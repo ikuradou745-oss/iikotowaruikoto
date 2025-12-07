@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>良いこと悪いこと考察用</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+  body {
+    font-family: sans-serif;
+  }
+
+  #chatBox p {
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .voteResult {
+    font-weight: bold;
+    margin-top: 5px;
+  }
+</style>
+
+</head>
+<body>
+
+<h1>良いこと悪いこと考察用</h1>
+<p>作: らも</p>
+
+<!--------- 投票 --------->
+
+<h2>投票お願いします</h2>
+<p>犯人は誰だと思う？</p>
+
+<div>
+  <label><input type="radio" name="vote" value="タカキング"> タカキング！</label>
+  <span class="voteResult" id="takakingCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
+  <span class="voteResult" id="taboCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
+  <span class="voteResult" id="imakuniCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="刑事"> 刑事？</label>
+  <span class="voteResult" id="keijiCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="アポロ"> アポロとか！</label>
+  <span class="voteResult" id="apolloCount">0 票</span>
+</div>
+
+<h3>名前</h3>
+<input type="text" id="otherInput" placeholder="名前を入力">
+<button onclick="voteOther()">送信</button>
+
+<br><br>
+<button onclick="vote()">投票する</button>
+
+<hr>
+
+<!--------- チャット --------->
+
+<h2>お話しゾーン</h2>
+
+<p>ニックネーム</p>
+<input type="text" id="nameInput">
+
+<p>メッセージを入れてね</p>
+<textarea id="messageInput"></textarea>
+
+<br><br>
+<button onclick="sendMessage()">メッセージ送る</button>
+
+<h3>みんなのメッセージ</h3>
+<div id="chatBox"></div>
+
+<footer>
+  <p>@ramo</p>
+</footer>
+
+<script>
+
+// ---------- 投票システム ----------
+
+let votes = JSON.parse(localStorage.getItem("votes")) || {
+  "タカキング": 0,
+  "イマクニ": 0,
+  "刑事": 0,
+  "アポロ": 0
+};
+
+function updateVotes() {
+  document.getElementById("takakingCount").innerText = votes["タカキング"] + " 票";
+  document.getElementById("taboCount").innerText = votes["ターボー"] + " 票";
+  document.getElementById("imakuniCount").innerText = votes["イマクニ"] + " 票";
+  document.getElementById("keijiCount").innerText = votes["刑事"] + " 票";
+  document.getElementById("apolloCount").innerText = votes["アポロ"] + " 票";
+}
+
+updateVotes();
+
+function vote() {
+  const selected = document.querySelector('input[name="vote"]:checked');
+
+  if (!selected) {
+    alert("誰かを選んでね！");
+    return;
+  }
+
+  votes[selected.value]++;
+  localStorage.setItem("votes", JSON.stringify(votes));
+
+  updateVotes();
+  alert("投票ありがとう！");
+}
+
+function voteOther(){
+  const other = document.getElementById("otherInput").value;
+  if(other === ""){
+    alert("名前を入れてね！");
+    return;
+  }
+  alert(other + " に投票したよ！（今回は記録しない設定）");
+  document.getElementById("otherInput").value = "";
+}
+
+
+// ---------- メッセージ機能 ----------
+
+const chatBox = document.getElementById("chatBox");
+
+window.onload = function() {
+  // 投票
+  updateVotes();
+
+  // メッセージ
+  const savedMessages = JSON.parse(localStorage.getItem("messages")) || [];
+  savedMessages.forEach(msg => {
+    chatBox.innerHTML += `<p>${msg}</p>`;
+  });
+}
+
+function sendMessage() {
+  const name = document.getElementById("nameInput").value;
+  const message = document.getElementById("messageInput").value;
+
+  if(name === "" || message === ""){
+    alert("名前とメッセージを入れてね！");
+    return;
+  }
+
+  const fullMessage = `送信者 ${name}：${message}`;
+
+  chatBox.innerHTML += `<p>${fullMessage}</p>`;
+
+  let messages = JSON.parse(localStorage.getItem("messages")) || [];
+  messages.push(fullMessage);
+  localStorage.setItem("messages", JSON.stringify(messages));
+
+  document.getElementById("messageInput").value = "";
+}
+
+</script>
+
+</body>
+</html>

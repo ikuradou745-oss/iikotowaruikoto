@@ -1,0 +1,102 @@
+body{
+  background: #fffce8;   /* うすい黄色 */
+  color: #333;
+  font-family: "Arial", sans-serif;
+  padding: 20px;
+}
+
+/* タイトル */
+h1{
+  text-align: center;
+  color: #e6a400;
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+/* 見出し */
+h2, h3{
+  color: #cc8f00;
+  margin-top: 30px;
+}
+
+/* 普通の文字 */
+p{
+  font-size: 16px;
+}
+
+/* 投票エリア */
+div{
+  margin: 10px 0;
+}
+
+/* ラジオボタン */
+label{
+  background: #fff3c4;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  display: inline-block;
+  border: 2px solid #ffd966;
+}
+
+label:hover{
+  background: #ffe599;
+}
+
+/* 投票結果の数字 */
+.voteResult{
+  margin-left: 10px;
+  color: #b37200;
+  font-weight: bold;
+}
+
+/* 入力フォーム */
+input, textarea{
+  width: 300px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #ffd966;
+  margin-top: 5px;
+  font-size: 14px;
+  background: #fffef5;
+}
+
+/* ボタン */
+button{
+  background: #ffd966;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+button:hover{
+  background: #ffcc00;
+}
+
+/* チャット */
+#chatBox{
+  background: #fff3c4;
+  padding: 10px;
+  border-radius: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 2px solid #ffd966;
+}
+
+#chatBox p{
+  background: #fff9dd;
+  padding: 6px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+/* フッター */
+footer{
+  text-align: center;
+  margin-top: 40px;
+  color: #666;
+}
