@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>良いこと悪いこと考察用</title>
   <style>
     body {
@@ -66,6 +66,11 @@
 
   <button onclick="sendVote()">投票する</button>
 
+  <h3>投票結果</h3>
+  <div id="voteResults">
+    <!-- 投票数がここに表示される -->
+  </div>
+
   <h2>お話しゾーン</h2>
   <p>ニックネーム</p>
   <input type="text" id="name" placeholder="ニックネームを入力" />
@@ -78,6 +83,69 @@
   <div id="chat"></div>
 
   <script>
+    // 投票数カウント用オブジェクト
+    const voteCounts = {
+      "タカキング": 0,
+      "イマクニ": 0,
+      "ターボー": 0,
+      "刑事": 0,
+      "アポロ": 0,
+      "その他": 0
+    };
+
+    // 投票送信
+    function sendVote() {
+      const radios = document.getElementsByName("vote");
+      let selected = null;
+      for (const r of radios) {
+        if (r.checked) {
+          selected = r.value;
+          break;
+        }
+      }
+      const other = document.getElementById("otherVote").value.trim();
+
+      if (!selected && !other) {
+        alert("投票を選ぶか、その他に名前を入力してください！");
+        return;
+      }
+
+      let voteResult = selected || "その他";
+
+      if (voteResult === "その他" && other !== "") {
+        voteResult = other;
+        // 新しい名前は voteCounts に入れず「その他」にカウント
+      }
+
+      if (voteCounts.hasOwnProperty(voteResult)) {
+        voteCounts[voteResult]++;
+      } else {
+        voteCounts["その他"]++;
+      }
+
+      alert("投票ありがとうございます！ あなたの投票: " + voteResult);
+
+      updateVoteResults();
+
+      // ラジオとテキストをリセット
+      for (const r of radios) {
+        r.checked = false;
+      }
+      document.getElementById("otherVote").value = "";
+    }
+
+    // 投票結果を表示
+    function updateVoteResults() {
+      const container = document.getElementById("voteResults");
+      container.innerHTML = "";
+
+      for (const key in voteCounts) {
+        const p = document.createElement("p");
+        p.textContent = key + " : " + voteCounts[key] + "票";
+        container.appendChild(p);
+      }
+    }
+
     // メッセージ送信
     function sendMessage() {
       const name = document.getElementById("name").value.trim();
@@ -91,26 +159,6 @@
       newMessage.textContent = name + "： " + message;
       chat.appendChild(newMessage);
       document.getElementById("message").value = "";
-    }
-
-    // 投票送信
-    function sendVote() {
-      const radios = document.getElementsByName("vote");
-      let selected = null;
-      for (const r of radios) {
-        if (r.checked) {
-          selected = r.value;
-          break;
-        }
-      }
-      const other = document.getElementById("otherVote").value.trim();
-      if (!selected && !other) {
-        alert("投票を選ぶか、その他に名前を入力してください！");
-        return;
-      }
-      const voteResult = selected || other;
-      alert("投票ありがとうございます！ あなたの投票: " + voteResult);
-      // ここに投票の保存処理を追加できます（今はアラートだけ）
     }
   </script>
 
