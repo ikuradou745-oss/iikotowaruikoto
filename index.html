@@ -103,7 +103,7 @@
   // 投票結果の表示更新
   function updateVotesUI(votes) {
     document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
-    document.getElementById("kingutumaCount").innerText = (votes["キングの妻"] || 0) - " 票";
+    document.getElementById("kingutumaCount").innerText = (votes["キングの妻"] || 0) + " 票";
     document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
     document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
     document.getElementById("keijiCount").innerText = (votes["刑事"] || 0) + " 票";
