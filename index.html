@@ -47,6 +47,11 @@
   <span class="voteResult" id="taboCount">0 票</span>
 </div>
 
+  <div>
+  <label><input type="radio" name="vote" value="キングの妻"> リクエスト！キングの妻</label>
+  <span class="voteResult" id="kingutumaCount">0 票</span>
+</div>
+
 <div>
   <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
   <span class="voteResult" id="imakuniCount">0 票</span>
@@ -98,6 +103,7 @@
   // 投票結果の表示更新
   function updateVotesUI(votes) {
     document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
+    document.getElementById("kingutumaCount").innerText = (votes["キングの妻"] || 0) + " 票";
     document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
     document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
     document.getElementById("keijiCount").innerText = (votes["刑事"] || 0) + " 票";
