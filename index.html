@@ -7,9 +7,22 @@
 <style>
   body { font-family: sans-serif; background: #ffffcc; padding: 20px; }
   .voteResult { font-weight: bold; margin-left: 10px; color: #cc9900; }
-  #chatBox { border: 1px solid #cc9900; background: #fff8b3; padding: 10px; height: 200px; overflow-y: auto; }
+  #chatBox { border: 1px solid #cc9900; background: #fff8b3; padding: 10px; height: 300px; overflow-y: auto; }
   input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; font-size: 1em; }
   button { background-color: #cc9900; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
+  p.message {
+    border-bottom: 1px solid #cc9900;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+  }
+  p.message strong {
+    color: #995500;
+  }
+  p.message time {
+    color: #666;
+    font-size: 0.8em;
+    margin-left: 5px;
+  }
 </style>
 
 <!-- Firebase SDK -->
@@ -113,14 +126,15 @@
   // チャットのメッセージ表示場所
   const chatBox = document.getElementById("chatBox");
 
-  // 新しいメッセージが来たらリアルタイムで表示
+  // 新しいメッセージが来たらリアルタイムで表示（最新メッセージを上に表示）
   db.ref('messages').on('child_added', (snapshot) => {
     const msg = snapshot.val();
-    if (msg && msg.name && msg.message) {
+    if (msg && msg.name && msg.message && msg.timestamp) {
       const p = document.createElement('p');
-      p.textContent = msg.name + "：" + msg.message;
-      chatBox.appendChild(p);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      p.className = 'message';
+      const dateStr = new Date(msg.timestamp).toLocaleString();
+      p.innerHTML = `<strong>${msg.name}</strong> <time>${dateStr}</time><br>${msg.message}`;
+      chatBox.prepend(p);
     }
   });
 
@@ -132,7 +146,8 @@
       alert("名前とメッセージを入れてね！");
       return;
     }
-    db.ref('messages').push({ name, message });
+    const timestamp = Date.now();
+    db.ref('messages').push({ name, message, timestamp });
     document.getElementById("messageInput").value = "";
   }
 </script>
