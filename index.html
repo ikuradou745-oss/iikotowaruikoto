@@ -65,14 +65,6 @@
     background: #fff3a0;
   }
 
-  /* BANリストのスクロールと背景 */
-  #banList {
-    background: #fff8b3;
-    padding: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-    border: 1px solid #cc9900;
-  }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -132,6 +124,9 @@
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
 
+<p id="onlineCount">見ている人: 0人</p>
+<p id="onlineIDs">見ている人のID: なし</p>
+
 <div id="adminBox">
   <h2>管理者権限</h2>
 
@@ -147,7 +142,7 @@
   <input type="text" id="unbanIDInput" placeholder="解除するID">
   <button id="unbanBtn">ID指定でBANを解除する</button>
 
-  <h4>BANされているIDリスト</h4>
+  <h3>現在BANされているIDリスト</h3>
   <ul id="banList"></ul>
 </div>
 
@@ -165,7 +160,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 8文字ID作成
 function generateID() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let id = "";
@@ -181,14 +175,14 @@ if (!userID) {
   localStorage.setItem("userID", userID);
 }
 
-// BANされたら画面をBANメッセージだけに
+// BANされているかチェック
 db.ref("bans/" + userID).on("value", s => {
   if (s.exists()) {
     document.body.innerHTML = "<h1>あなたはBANされています</h1>";
   }
 });
 
-// 投票のUI更新
+// ===== 投票 =====
 function updateVotesUI(votes) {
   takakingCount.innerText = (votes["タカキング"] || 0) + " 票";
   taboCount.innerText = (votes["ターボー"] || 0) + " 票";
@@ -205,15 +199,15 @@ function vote() {
   db.ref("votes/" + sel.value).transaction(n => (n || 0) + 1);
 }
 
-// チャット & 時間ON/OFF切替
+// ===== チャット & 時間ON/OFF =====
+
 let unknownTime = false;
+
 function toggleUnknownTime() {
   unknownTime = !unknownTime;
   const btn = document.getElementById("timeBtn");
   btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
 }
-
-const chatBox = document.getElementById("chatBox");
 
 db.ref('messages').on('child_added', snap => {
   const msg = snap.val();
@@ -245,38 +239,15 @@ function sendMessage() {
   messageInput.value = "";
 }
 
-// 管理者判定
-let isAdmin = false;
-const adminInput = document.getElementById("adminInput");
-const deleteAll = document.getElementById("deleteAll");
-const banBtn = document.getElementById("banBtn");
-const unbanBtn = document.getElementById("unbanBtn");
-const banIDInput = document.getElementById("banIDInput");
-const unbanIDInput = document.getElementById("unbanIDInput");
-const banListUl = document.getElementById("banList");
+// ===== 管理者 =====
 
-// 管理者コード変更時処理
+let isAdmin = false;
+
 adminInput.addEventListener("change", () => {
   isAdmin = adminInput.value === "1x4s";
   alert(isAdmin ? "管理者OK" : "コードが違います");
-
-  if (!isAdmin) {
-    banListUl.innerHTML = "";
-  } else {
-    // 管理者になったらBANリスト表示を更新
-    db.ref("bans").once("value").then(snapshot => {
-      const bans = snapshot.val() || {};
-      banListUl.innerHTML = "";
-      for (const id in bans) {
-        const li = document.createElement("li");
-        li.textContent = id;
-        banListUl.appendChild(li);
-      }
-    });
-  }
 });
 
-// メッセージ一括削除ボタン
 deleteAll.onclick = () => {
   if (!isAdmin) return alert("管理者のみ");
   if (confirm("全部消しますか？")) {
@@ -285,42 +256,71 @@ deleteAll.onclick = () => {
   }
 };
 
-// BANするボタン
 banBtn.onclick = () => {
   if (!isAdmin) return alert("管理者のみ");
   const id = banIDInput.value.trim();
-  if (!id) return alert("IDを入力してください");
-  if (confirm(`ID「${id}」をBANしますか？`)) {
-    db.ref("bans/" + id).set(true);
+  if (id) {
+    if (confirm(`本当にID「${id}」をBANしますか？`)) {
+      db.ref("bans/" + id).set(true);
+      banIDInput.value = "";
+    }
   }
 };
 
-// BAN解除ボタン
 unbanBtn.onclick = () => {
   if (!isAdmin) return alert("管理者のみ");
   const id = unbanIDInput.value.trim();
-  if (!id) return alert("IDを入力してください");
-  if (confirm(`ID「${id}」のBANを解除しますか？`)) {
-    db.ref("bans/" + id).remove();
+  if (id) {
+    if (confirm(`本当にID「${id}」のBANを解除しますか？`)) {
+      db.ref("bans/" + id).remove();
+      unbanIDInput.value = "";
+    }
   }
 };
 
-// BANリストのリアルタイム監視・表示（管理者のみ）
-db.ref("bans").on("value", (snapshot) => {
-  if (!isAdmin) {
-    banListUl.innerHTML = "";
-    return;
-  }
-
+// BANリスト表示
+const banList = document.getElementById("banList");
+db.ref("bans").on("value", snapshot => {
+  banList.innerHTML = "";
   const bans = snapshot.val() || {};
-  banListUl.innerHTML = "";
+  const keys = Object.keys(bans);
+  if (keys.length === 0) {
+    banList.innerHTML = "<li>現在BANされているIDはありません</li>";
+  } else {
+    keys.forEach(id => {
+      const li = document.createElement("li");
+      li.textContent = id;
+      banList.appendChild(li);
+    });
+  }
+});
 
-  for (const id in bans) {
-    const li = document.createElement("li");
-    li.textContent = id;
-    banListUl.appendChild(li);
+// ===== 見ている人数とID表示 =====
+const onlineCountP = document.getElementById("onlineCount");
+const onlineIDsP = document.getElementById("onlineIDs");
+const presenceRef = db.ref("presence/" + userID);
+const presenceListRef = db.ref("presence");
+
+db.ref(".info/connected").on("value", (snap) => {
+  if (snap.val() === true) {
+    presenceRef.set(true);
+    presenceRef.onDisconnect().remove();
+  }
+});
+
+presenceListRef.on("value", (snap) => {
+  const ids = [];
+  snap.forEach(child => {
+    ids.push(child.key);
+  });
+  onlineCountP.textContent = `見ている人: ${ids.length}人`;
+  if (ids.length === 0) {
+    onlineIDsP.textContent = "見ている人のID: なし";
+  } else {
+    onlineIDsP.textContent = `見ている人のID: ${ids.join(", ")}`;
   }
 });
 </script>
+
 </body>
 </html>
