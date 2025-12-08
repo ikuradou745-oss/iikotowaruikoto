@@ -64,6 +64,23 @@
     border: 2px dashed #aa7700;
     background: #fff3a0;
   }
+
+  /* 目次リンクのスタイル */
+  #toc {
+    margin: 10px 0 30px 0;
+  }
+
+  #toc a {
+    color: #cc9900;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 15px;
+  }
+
+  #toc a:hover {
+    text-decoration: underline;
+  }
+
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -75,7 +92,15 @@
 <h1>良いこと悪いこと考察用</h1>
 <p>作: らも</p>
 
-<h2>投票お願いします</h2>
+<!-- ここから目次 -->
+<div id="toc">
+  <a href="#voteSection">投票</a>
+  <a href="#messageSection">メッセージ</a>
+  <a href="#adminSection">管理者権限</a>
+</div>
+<!-- 目次ここまで -->
+
+<h2 id="voteSection">投票お願いします</h2>
 <p>犯人は誰だと思う？</p>
 
 <div>
@@ -86,6 +111,11 @@
 <div>
   <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
   <span class="voteResult" id="taboCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="ターボーの妻"> ターボーの妻</label>
+  <span class="voteResult" id="taboWifeCount">0 票</span>
 </div>
 
 <div>
@@ -107,7 +137,7 @@
 
 <hr>
 
-<h2>お話しゾーン</h2>
+<h2 id="messageSection">お話しゾーン</h2>
 
 <p>ニックネーム</p>
 <input type="text" id="nameInput" placeholder="ニックネーム">
@@ -126,8 +156,10 @@
 <p id="onlineCount">見ている人: 0人</p>
 <p id="onlineIDs">見ている人のID: なし</p>
 
+<hr>
+
 <div id="adminBox">
-  <h2>管理者権限</h2>
+  <h2 id="adminSection">管理者権限</h2>
 
   <input type="text" id="adminInput" placeholder="管理者コード">
 
@@ -184,6 +216,7 @@ db.ref("bans/" + userID).on("value", s => {
 function updateVotesUI(votes) {
   takakingCount.innerText = (votes["タカキング"] || 0) + " 票";
   taboCount.innerText = (votes["ターボー"] || 0) + " 票";
+  taboWifeCount.innerText = (votes["ターボーの妻"] || 0) + " 票";
   imakuniCount.innerText = (votes["イマクニ"] || 0) + " 票";
   keijiCount.innerText = (votes["刑事"] || 0) + " 票";
   apolloCount.innerText = (votes["アポロ"] || 0) + " 票";
@@ -288,7 +321,8 @@ const onlineIDsP = document.getElementById("onlineIDs");
 const presenceRef = db.ref("presence/" + userID);
 const presenceListRef = db.ref("presence");
 
-db.ref(".info/connected").on("value", (snap) => {
+// 接続状態の管理
+db.ref(".info/connected").on("value", snap => {
   if (snap.val() === true) {
     presenceRef.set(true);
     presenceRef.onDisconnect().remove();
@@ -299,6 +333,7 @@ let currentBanIDs = [];
 let currentPresenceIDs = [];
 
 function updateOnlineDisplay() {
+  // BANされているIDを除いて表示
   const visibleIDs = currentPresenceIDs.filter(id => !currentBanIDs.includes(id));
   onlineCountP.textContent = `見ている人: ${visibleIDs.length}人`;
   onlineIDsP.textContent = visibleIDs.length === 0 ? "見ている人のID: なし" : `見ている人のID: ${visibleIDs.join(", ")}`;
@@ -319,6 +354,5 @@ presenceListRef.on("value", snap => {
   updateOnlineDisplay();
 });
 </script>
-
 </body>
 </html>
