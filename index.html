@@ -64,7 +64,6 @@
     border: 2px dashed #aa7700;
     background: #fff3a0;
   }
-
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -142,8 +141,8 @@
   <input type="text" id="unbanIDInput" placeholder="解除するID">
   <button id="unbanBtn">ID指定でBANを解除する</button>
 
-  <h3>現在BANされているIDリスト</h3>
-  <ul id="banList"></ul>
+  <h4>現在BAN中のID一覧</h4>
+  <p id="banList">なし</p>
 </div>
 
 <script>
@@ -175,7 +174,6 @@ if (!userID) {
   localStorage.setItem("userID", userID);
 }
 
-// BANされているかチェック
 db.ref("bans/" + userID).on("value", s => {
   if (s.exists()) {
     document.body.innerHTML = "<h1>あなたはBANされています</h1>";
@@ -208,6 +206,8 @@ function toggleUnknownTime() {
   const btn = document.getElementById("timeBtn");
   btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
 }
+
+const chatBox = document.getElementById("chatBox");
 
 db.ref('messages').on('child_added', snap => {
   const msg = snap.val();
@@ -259,43 +259,30 @@ deleteAll.onclick = () => {
 banBtn.onclick = () => {
   if (!isAdmin) return alert("管理者のみ");
   const id = banIDInput.value.trim();
-  if (id) {
-    if (confirm(`本当にID「${id}」をBANしますか？`)) {
-      db.ref("bans/" + id).set(true);
-      banIDInput.value = "";
-    }
+  if (!id) return alert("IDを入力してください");
+  if (confirm(`ID「${id}」をBANしますか？`)) {
+    db.ref("bans/" + id).set(true);
   }
 };
 
 unbanBtn.onclick = () => {
   if (!isAdmin) return alert("管理者のみ");
   const id = unbanIDInput.value.trim();
-  if (id) {
-    if (confirm(`本当にID「${id}」のBANを解除しますか？`)) {
-      db.ref("bans/" + id).remove();
-      unbanIDInput.value = "";
-    }
+  if (!id) return alert("IDを入力してください");
+  if (confirm(`ID「${id}」のBANを解除しますか？`)) {
+    db.ref("bans/" + id).remove();
   }
 };
 
-// BANリスト表示
-const banList = document.getElementById("banList");
+// ===== BANリストの表示 =====
+const banListP = document.getElementById("banList");
 db.ref("bans").on("value", snapshot => {
-  banList.innerHTML = "";
   const bans = snapshot.val() || {};
-  const keys = Object.keys(bans);
-  if (keys.length === 0) {
-    banList.innerHTML = "<li>現在BANされているIDはありません</li>";
-  } else {
-    keys.forEach(id => {
-      const li = document.createElement("li");
-      li.textContent = id;
-      banList.appendChild(li);
-    });
-  }
+  const ids = Object.keys(bans);
+  banListP.textContent = ids.length === 0 ? "なし" : ids.join(", ");
 });
 
-// ===== 見ている人数とID表示 =====
+// ===== 見ている人（BAN除外でリアルタイム表示） =====
 const onlineCountP = document.getElementById("onlineCount");
 const onlineIDsP = document.getElementById("onlineIDs");
 const presenceRef = db.ref("presence/" + userID);
@@ -308,17 +295,28 @@ db.ref(".info/connected").on("value", (snap) => {
   }
 });
 
-presenceListRef.on("value", (snap) => {
+let currentBanIDs = [];
+let currentPresenceIDs = [];
+
+function updateOnlineDisplay() {
+  const visibleIDs = currentPresenceIDs.filter(id => !currentBanIDs.includes(id));
+  onlineCountP.textContent = `見ている人: ${visibleIDs.length}人`;
+  onlineIDsP.textContent = visibleIDs.length === 0 ? "見ている人のID: なし" : `見ている人のID: ${visibleIDs.join(", ")}`;
+}
+
+db.ref("bans").on("value", snapshot => {
+  const bans = snapshot.val() || {};
+  currentBanIDs = Object.keys(bans);
+  updateOnlineDisplay();
+});
+
+presenceListRef.on("value", snap => {
   const ids = [];
   snap.forEach(child => {
     ids.push(child.key);
   });
-  onlineCountP.textContent = `見ている人: ${ids.length}人`;
-  if (ids.length === 0) {
-    onlineIDsP.textContent = "見ている人のID: なし";
-  } else {
-    onlineIDsP.textContent = `見ている人のID: ${ids.join(", ")}`;
-  }
+  currentPresenceIDs = ids;
+  updateOnlineDisplay();
 });
 </script>
 
