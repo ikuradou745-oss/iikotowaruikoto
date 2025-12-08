@@ -228,6 +228,17 @@
   <p id="banList">なし</p>
 </div>
 
+  <!-- オーナー専用 -->
+<div id="ownerBox" style="margin-top:20px; padding:15px; border:2px solid red; background:#ffe5e5;">
+  <h2 style="color:red;">オーナー専用</h2>
+  <input type="text" id="ownerInput" placeholder="オーナーコード" />
+  <button id="ownerCheckBtn">オーナー認証</button>
+
+  <div id="ownerFeatures" style="display:none; margin-top:10px;">
+    <p style="color:red;">※オーナー専用機能がここに表示されます（今は空）</p>
+  </div>
+</div>
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
