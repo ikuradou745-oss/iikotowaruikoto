@@ -6,85 +6,104 @@
 <title>良いこと悪いこと考察用</title>
 
 <style>
-body { 
-  font-family: sans-serif; 
-  background: #ffffcc; 
-  padding: 20px; 
-}
+  body { 
+    font-family: sans-serif; 
+    background: #ffffcc; 
+    padding: 20px; 
+  }
 
-.voteResult {
-  font-weight: bold; 
-  margin-left: 10px; 
-  color: #cc9900;
-}
+  .voteResult {
+    font-weight: bold; 
+    margin-left: 10px; 
+    color: #cc9900;
+  }
 
-#chatBox { 
-  border: 1px solid #cc9900; 
-  background: #fff8b3; 
-  padding: 10px; 
-  height: 300px; 
-  overflow-y: auto; 
-}
+  #chatBox { 
+    border: 1px solid #cc9900; 
+    background: #fff8b3; 
+    padding: 10px; 
+    height: 300px; 
+    overflow-y: auto; 
+  }
 
-input, textarea { 
-  width: 100%; 
-  margin-bottom: 10px; 
-  padding: 8px; 
-  font-size: 1em; 
-}
+  input, textarea { 
+    width: 100%; 
+    margin-bottom: 10px; 
+    padding: 8px; 
+    font-size: 1em; 
+  }
 
-button { 
-  background-color: #cc9900; 
-  color: white; 
-  padding: 10px; 
-  border: none; 
-  border-radius: 4px; 
-  cursor: pointer; 
-  margin-bottom: 10px;
-}
+  button { 
+    background-color: #cc9900; 
+    color: white; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    margin-bottom: 10px;
+  }
 
-p.message {
-  border-bottom: 1px solid #cc9900;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-}
+  p.message {
+    border-bottom: 1px solid #cc9900;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+  }
 
-#adminBox {
-  margin-top: 40px;
-  padding: 15px;
-  border: 2px dashed #aa7700;
-  background: #fff3a0;
-}
+  p.message strong {
+    color: #995500;
+  }
 
-#banScreen{
-  display:none;
-  font-size: 30px;
-  color:red;
-  text-align:center;
-  margin-top:100px;
-  font-weight:bold;
-}
+  p.message time {
+    color: #666;
+    font-size: 0.8em;
+    margin-left: 5px;
+  }
+
+  #adminBox {
+    margin-top: 40px;
+    padding: 15px;
+    border: 2px dashed #aa7700;
+    background: #fff3a0;
+  }
 </style>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-</head>
 
+</head>
 <body>
 
-<div id="mainContent">
 <h1>良いこと悪いこと考察用</h1>
 <p>作: らも</p>
 
 <h2>投票お願いします</h2>
+<p>犯人は誰だと思う？</p>
 
-<div><label><input type="radio" name="vote" value="タカキング"> タカキング</label><span class="voteResult" id="takakingCount">0 票</span></div>
-<div><label><input type="radio" name="vote" value="ターボー"> ターボー</label><span class="voteResult" id="taboCount">0 票</span></div>
-<div><label><input type="radio" name="vote" value="イマクニ"> イマクニ</label><span class="voteResult" id="imakuniCount">0 票</span></div>
-<div><label><input type="radio" name="vote" value="刑事"> 刑事</label><span class="voteResult" id="keijiCount">0 票</span></div>
-<div><label><input type="radio" name="vote" value="アポロ"> アポロ</label><span class="voteResult" id="apolloCount">0 票</span></div>
-<div><label><input type="radio" name="vote" value="キングの妻"> キングの妻</label><span class="voteResult" id="queenCount">0 票</span></div>
+<div>
+  <label><input type="radio" name="vote" value="タカキング"> タカキング！</label>
+  <span class="voteResult" id="takakingCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
+  <span class="voteResult" id="taboCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
+  <span class="voteResult" id="imakuniCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="刑事"> 刑事？</label>
+  <span class="voteResult" id="keijiCount">0 票</span>
+</div>
+
+<div>
+  <label><input type="radio" name="vote" value="アポロ"> アポロとか！</label>
+  <span class="voteResult" id="apolloCount">0 票</span>
+</div>
 
 <button onclick="vote()">投票する</button>
 
@@ -92,143 +111,178 @@ p.message {
 
 <h2>お話しゾーン</h2>
 
-<p>あなたのID: <span id="myId"></span></p>
+<p>ニックネーム</p>
+<input type="text" id="nameInput" placeholder="ニックネームを入力">
 
-<input type="text" id="nameInput" placeholder="ニックネーム" />
-<textarea id="messageInput" rows="3" placeholder="メッセージ"></textarea>
-<button onclick="sendMessage()">送信</button>
+<p>メッセージを入れてね</p>
+<textarea id="messageInput" rows="4" placeholder="メッセージを入力"></textarea>
+
+<button onclick="sendMessage()">メッセージ送る</button>
 
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
 
 <div id="adminBox">
-  <h2>管理者</h2>
-  <input type="text" id="adminInput" placeholder="管理者コード">
-
-  <button id="deleteAll">⚠ メッセージ一括削除</button>
-
-  <hr>
-
-  <input type="text" id="banIdInput" placeholder="BANしたいID">
-  <button id="banBtn">ID指定でBANする</button>
-
-  <input type="text" id="unbanIdInput" placeholder="解除したいID">
-  <button id="unbanBtn">ID指定でBAN解除する</button>
-
+  <h2>管理者権限</h2>
+  <p>管理者パスワード</p>
+  <input type="text" id="adminInput" placeholder="管理者用コードを入力">
 </div>
-</div>
-
-<div id="banScreen">あなたはBANされています</div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
-  authDomain: "iikotowaruikoto-d5aa7.firebaseapp.com",
-  databaseURL: "https://iikotowaruikoto-d5aa7-default-rtdb.firebaseio.com",
-  projectId: "iikotowaruikoto-d5aa7",
-  storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
-  messagingSenderId: "455780219216",
-  appId: "1:455780219216:web:225461fcf24c1a46f69455"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
+    authDomain: "iikotowaruikoto-d5aa7.firebaseapp.com",
+    databaseURL: "https://iikotowaruikoto-d5aa7-default-rtdb.firebaseio.com",
+    projectId: "iikotowaruikoto-d5aa7",
+    storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
+    messagingSenderId: "455780219216",
+    appId: "1:455780219216:web:225461fcf24c1a46f69455"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-/* ===== ID作成 ===== */
-function makeId() {
-  return Math.random().toString(36).substring(2, 10);
-}
-
-let myId = localStorage.getItem("myId");
-if (!myId) {
-  myId = makeId();
-  localStorage.setItem("myId", myId);
-}
-document.getElementById("myId").innerText = myId;
-
-/* ===== BAN確認 ===== */
-db.ref("bans/" + myId).on("value", snap=>{
-  if(snap.exists()){
-    document.getElementById("mainContent").style.display = "none";
-    document.getElementById("banScreen").style.display = "block";
-  }else{
-    document.getElementById("mainContent").style.display = "block";
-    document.getElementById("banScreen").style.display = "none";
+  // ===== 8文字ID生成 =====
+  function generateID() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let id = "";
+    for (let i = 0; i < 8; i++) {
+      id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
   }
-})
 
-/* ===== 投票 ===== */
-function updateVotesUI(votes){
-  document.getElementById("takakingCount").innerText = (votes["タカキング"]||0) + " 票";
-  document.getElementById("taboCount").innerText = (votes["ターボー"]||0) + " 票";
-  document.getElementById("imakuniCount").innerText = (votes["イマクニ"]||0) + " 票";
-  document.getElementById("keijiCount").innerText = (votes["刑事"]||0) + " 票";
-  document.getElementById("apolloCount").innerText = (votes["アポロ"]||0) + " 票";
-  document.getElementById("queenCount").innerText = (votes["キングの妻"]||0) + " 票";
-}
+  let userID = localStorage.getItem("userID");
+  if (!userID) {
+    userID = generateID();
+    localStorage.setItem("userID", userID);
+  }
 
-db.ref('votes').on('value', snap=>{
-  updateVotesUI(snap.val() || {});
-});
+  // ===== BANチェック =====
+  const body = document.body;
 
-function vote(){
-  const s = document.querySelector('input[name="vote"]:checked');
-  if(!s){alert("選んでね");return;}
-  db.ref('votes/'+s.value).transaction(v=>(v||0)+1);
-}
-
-/* ===== チャット ===== */
-const chatBox = document.getElementById("chatBox");
-
-db.ref("messages").on("child_added", snap=>{
-  const m = snap.val();
-  const p = document.createElement("p");
-  p.className = "message";
-  p.innerHTML = `<strong>${m.name} (${m.id})</strong><br>${m.message}`;
-  chatBox.prepend(p);
-})
-
-function sendMessage(){
-  const name = document.getElementById("nameInput").value.trim();
-  const msg = document.getElementById("messageInput").value.trim();
-  if(!name||!msg)return;
-
-  db.ref("messages").push({
-    name:name,
-    message:msg,
-    id:myId,
-    time:Date.now()
+  db.ref("banned/" + userID).on("value", (snapshot) => {
+    if (snapshot.exists()) {
+      body.innerHTML = "<h1>あなたはBANされています。</h1>";
+    }
   });
 
-  document.getElementById("messageInput").value="";
-}
+  // ===== 投票 =====
+  function updateVotesUI(votes) {
+    document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
+    document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
+    document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
+    document.getElementById("keijiCount").innerText = (votes["刑事"] || 0) + " 票";
+    document.getElementById("apolloCount").innerText = (votes["アポロ"] || 0) + " 票";
+  }
 
-/* ===== 管理者 ===== */
-let isAdmin=false;
-document.getElementById("adminInput").addEventListener("change",e=>{
-  if(e.target.value==="1x4s"){isAdmin=true; alert("管理者ON");}
-  else{isAdmin=false; alert("NG");}
-});
+  db.ref('votes').on('value', (snapshot) => {
+    const votes = snapshot.val() || {};
+    updateVotesUI(votes);
+  });
 
-/* 削除 */
-document.getElementById("deleteAll").onclick=()=>{
-  if(!isAdmin)return alert("権限なし");
-  if(confirm("全消去する？")) db.ref("messages").remove();
-}
+  function vote() {
+    const selected = document.querySelector('input[name="vote"]:checked');
+    if (!selected) {
+      alert("誰かを選んでね！");
+      return;
+    }
+    const voteName = selected.value;
+    db.ref('votes/' + voteName).transaction(current => (current || 0) + 1);
+  }
 
-/* BAN */
-document.getElementById("banBtn").onclick=()=>{
-  if(!isAdmin) return alert("権限なし");
-  const id = document.getElementById("banIdInput").value.trim();
-  if(id) db.ref("bans/"+id).set(true);
-}
+  // ===== チャット =====
+  const chatBox = document.getElementById("chatBox");
 
-/* 解除 */
-document.getElementById("unbanBtn").onclick=()=>{
-  if(!isAdmin) return alert("権限なし");
-  const id = document.getElementById("unbanIdInput").value.trim();
-  if(id) db.ref("bans/"+id).remove();
-}
+  db.ref('messages').on('child_added', (snapshot) => {
+    const msg = snapshot.val();
+    if (msg && msg.name && msg.message && msg.timestamp && msg.userID) {
+      const p = document.createElement('p');
+      p.className = 'message';
+      const dateStr = new Date(msg.timestamp).toLocaleString();
+      p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong> <time>${dateStr}</time><br>${msg.message}`;
+      chatBox.prepend(p);
+    }
+  });
+
+  function sendMessage() {
+    const name = document.getElementById("nameInput").value.trim();
+    const message = document.getElementById("messageInput").value.trim();
+
+    if (!name || !message) {
+      alert("名前とメッセージを入れてね！");
+      return;
+    }
+
+    db.ref('messages').push({ 
+      name, 
+      message, 
+      timestamp: Date.now(),
+      userID
+    });
+
+    document.getElementById("messageInput").value = "";
+  }
+
+  // ===== 管理者機能 =====
+  let isAdmin = false;
+
+  document.getElementById("adminInput").addEventListener("change", function() {
+    if (this.value === "1x4s") {
+      isAdmin = true;
+      alert("✅ 管理者になりました");
+    } else {
+      isAdmin = false;
+      alert("❌ コードが違います");
+    }
+  });
+
+  const adminBox = document.getElementById("adminBox");
+
+  // メッセージ全削除
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "⚠ メッセージ一括削除";
+  deleteBtn.onclick = () => {
+    if (!isAdmin) return alert("管理者じゃないよ！");
+    if (confirm("本当にすべて消す？")) {
+      db.ref("messages").remove();
+      chatBox.innerHTML = "";
+    }
+  };
+  adminBox.appendChild(deleteBtn);
+
+  // BAN入力欄
+  const banInput = document.createElement("input");
+  banInput.placeholder = "BANするID";
+  adminBox.appendChild(banInput);
+
+  // BANボタン
+  const banBtn = document.createElement("button");
+  banBtn.textContent = "ID指定でBANする";
+  banBtn.onclick = () => {
+    if (!isAdmin) return alert("管理者じゃないよ！");
+    if (!banInput.value) return alert("IDを入れてね！");
+    db.ref("banned/" + banInput.value).set(true);
+    alert("BANしました");
+  };
+  adminBox.appendChild(banBtn);
+
+  // BAN解除欄
+  const unbanInput = document.createElement("input");
+  unbanInput.placeholder = "BAN解除するID";
+  adminBox.appendChild(unbanInput);
+
+  // BAN解除ボタン
+  const unbanBtn = document.createElement("button");
+  unbanBtn.textContent = "ID指定でBAN解除する";
+  unbanBtn.onclick = () => {
+    if (!isAdmin) return alert("管理者じゃないよ！");
+    if (!unbanInput.value) return alert("IDを入れてね！");
+    db.ref("banned/" + unbanInput.value).remove();
+    alert("BAN解除しました");
+  };
+  adminBox.appendChild(unbanBtn);
+
 </script>
 
 </body>
