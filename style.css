@@ -172,3 +172,13 @@ button[disabled]{ opacity:0.6; cursor:not-allowed; transform:none; box-shadow:no
   .row{ flex-direction:column; }
   .row .small{ width:100%; }
 }
+
+/* 目次リンク青色に */
+#toc a {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+#toc a:hover {
+  color: #0056b3;
+}
