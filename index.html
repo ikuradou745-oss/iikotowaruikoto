@@ -473,3 +473,17 @@ presenceListRef.on("value", snap => {
 </script>
 </body>
 </html>
+
+// ===== オーナー権限 =====
+let isOwner = false;
+
+document.getElementById("ownerCheckBtn").onclick = () => {
+  const code = document.getElementById("ownerInput").value.trim();
+  if (code === "5y3y") {
+    isOwner = true;
+    alert("オーナー権限OK");
+    document.getElementById("ownerFeatures").style.display = "block";
+  } else {
+    alert("コードが違います");
+  }
+};
