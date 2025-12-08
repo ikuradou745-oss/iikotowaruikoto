@@ -65,61 +65,26 @@
     background: #fff3a0;
   }
 
-  /* 目次リンクのスタイル */
-  #toc {
-    margin: 10px 0 30px 0;
-  }
-
-  #toc a {
-    color: #cc9900;
-    text-decoration: none;
-    font-weight: bold;
-    margin-right: 15px;
-  }
-
-  #toc a:hover {
-    text-decoration: underline;
-  }
-
-  /* スタンプ選択モーダル風 */
-  #stampSelector {
+  #stampPanel {
     display: none;
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    margin-bottom: 10px;
+    border: 1px solid #cc9900;
     background: #fff8b3;
-    border: 2px solid #cc9900;
-    border-radius: 8px;
-    padding: 15px;
-    z-index: 1000;
-    box-shadow: 0 0 10px #cc9900;
+    padding: 10px;
+    border-radius: 6px;
   }
-  #stampSelector h3 {
-    margin-top: 0;
-    color: #cc9900;
-  }
-  #stampSelector .stampList {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    max-width: 300px;
-  }
-  #stampSelector .stampList img {
-    width: 60px;
-    height: 60px;
+
+  #stampPanel img {
     cursor: pointer;
+    width: 60px;
+    margin: 5px;
     border: 2px solid transparent;
     border-radius: 6px;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s;
   }
-  #stampSelector .stampList img:hover {
+  #stampPanel img:hover {
     border-color: #cc9900;
   }
-  #stampSelector button.closeBtn {
-    background: #cc9900;
-    margin-top: 10px;
-  }
-
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -131,52 +96,7 @@
 <h1>良いこと悪いこと考察用</h1>
 <p>作: らも</p>
 
-<!-- ここから目次 -->
-<div id="toc">
-  <a href="#voteSection">投票</a>
-  <a href="#messageSection">メッセージ</a>
-  <a href="#adminSection">管理者権限</a>
-</div>
-<!-- 目次ここまで -->
-
-<h2 id="voteSection">投票お願いします</h2>
-<p>犯人は誰だと思う？</p>
-
-<div>
-  <label><input type="radio" name="vote" value="タカキング"> タカキング</label>
-  <span class="voteResult" id="takakingCount">0 票</span>
-</div>
-
-<div>
-  <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
-  <span class="voteResult" id="taboCount">0 票</span>
-</div>
-
-<div>
-  <label><input type="radio" name="vote" value="ターボーの妻"> ターボーの妻</label>
-  <span class="voteResult" id="taboWifeCount">0 票</span>
-</div>
-
-<div>
-  <label><input type="radio" name="vote" value="イマクニ"> イマクニ</label>
-  <span class="voteResult" id="imakuniCount">0 票</span>
-</div>
-
-<div>
-  <label><input type="radio" name="vote" value="刑事"> 刑事</label>
-  <span class="voteResult" id="keijiCount">0 票</span>
-</div>
-
-<div>
-  <label><input type="radio" name="vote" value="アポロ"> アポロ</label>
-  <span class="voteResult" id="apolloCount">0 票</span>
-</div>
-
-<button onclick="vote()">投票する</button>
-
-<hr>
-
-<h2 id="messageSection">お話しゾーン</h2>
+<h2>お話しゾーン</h2>
 
 <p>ニックネーム</p>
 <input type="text" id="nameInput" placeholder="ニックネーム">
@@ -187,46 +107,17 @@
 <div class="row">
   <button onclick="sendMessage()">メッセージを送る</button>
   <button onclick="toggleUnknownTime()" id="timeBtn">時間：通常</button>
+  <button onclick="toggleStampPanel()">スタンプを選択</button>
 </div>
 
-<!-- スタンプ選択ボタン -->
-<button onclick="openStampSelector()">スタンプを選択</button>
-
-<!-- スタンプ選択モーダル -->
-<div id="stampSelector">
-  <h3>スタンプを選んでね！</h3>
-  <div class="stampList" id="stampList">
-    <!-- スタンプ画像がここに入る -->
-  </div>
-  <button class="closeBtn" onclick="closeStampSelector()">閉じる</button>
+<!-- スタンプ選択パネル -->
+<div id="stampPanel">
+  <img src="stamp1.png" alt="スタンプ1" onclick="sendStamp('stamp1.png')">
+  <!-- 他のスタンプ画像もここに追加可能 -->
 </div>
 
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
-
-<p id="onlineCount">見ている人: 0人</p>
-<p id="onlineIDs">見ている人のID: なし</p>
-
-<hr>
-
-<div id="adminBox">
-  <h2 id="adminSection">管理者権限</h2>
-
-  <input type="text" id="adminInput" placeholder="管理者コード">
-
-  <button id="deleteAll">⚠ メッセージ一括削除</button>
-
-  <h3>BANシステム</h3>
-
-  <input type="text" id="banIDInput" placeholder="BANするID">
-  <button id="banBtn">ID指定でBANする</button>
-
-  <input type="text" id="unbanIDInput" placeholder="解除するID">
-  <button id="unbanBtn">ID指定でBANを解除する</button>
-
-  <h4>現在BAN中のID一覧</h4>
-  <p id="banList">なし</p>
-</div>
 
 <script>
 const firebaseConfig = {
@@ -257,32 +148,6 @@ if (!userID) {
   localStorage.setItem("userID", userID);
 }
 
-db.ref("bans/" + userID).on("value", s => {
-  if (s.exists()) {
-    document.body.innerHTML = "<h1>あなたはBANされています</h1>";
-  }
-});
-
-// ===== 投票 =====
-function updateVotesUI(votes) {
-  takakingCount.innerText = (votes["タカキング"] || 0) + " 票";
-  taboCount.innerText = (votes["ターボー"] || 0) + " 票";
-  taboWifeCount.innerText = (votes["ターボーの妻"] || 0) + " 票";
-  imakuniCount.innerText = (votes["イマクニ"] || 0) + " 票";
-  keijiCount.innerText = (votes["刑事"] || 0) + " 票";
-  apolloCount.innerText = (votes["アポロ"] || 0) + " 票";
-}
-
-db.ref("votes").on("value", s => updateVotesUI(s.val() || {}));
-
-function vote() {
-  const sel = document.querySelector('input[name="vote"]:checked');
-  if (!sel) return alert("選んでね！");
-  db.ref("votes/" + sel.value).transaction(n => (n || 0) + 1);
-}
-
-// ===== チャット & 時間ON/OFF =====
-
 let unknownTime = false;
 
 function toggleUnknownTime() {
@@ -291,29 +156,36 @@ function toggleUnknownTime() {
   btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
 }
 
+function toggleStampPanel() {
+  const panel = document.getElementById("stampPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
 const chatBox = document.getElementById("chatBox");
+const nameInput = document.getElementById("nameInput");
+const messageInput = document.getElementById("messageInput");
 
 db.ref('messages').on('child_added', snap => {
   const msg = snap.val();
-  const time = msg.timestamp === "unknown" ? "不明" : new Date(msg.timestamp).toLocaleString();
+  const timeText = msg.timestamp === "unknown" ? "時間：不明" : `時間：${new Date(msg.timestamp).toLocaleString()}`;
   const p = document.createElement("p");
   p.className = "message";
-
-  if (msg.type === "stamp") {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br><img src="${msg.stampUrl}" alt="スタンプ" width="80" />`;
+  if (msg.message.startsWith('<img')) {
+    // スタンプの場合は画像をそのまま表示
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${timeText}</small>`;
   } else {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
+    // 普通のメッセージ
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${timeText}</small>`;
   }
-
   chatBox.prepend(p);
 });
 
 function sendMessage() {
-  const name = document.getElementById("nameInput").value.trim();
-  const message = document.getElementById("messageInput").value.trim();
+  const name = nameInput.value.trim();
+  const message = messageInput.value.trim();
 
   if (!name || !message) {
-    alert("入力してね！");
+    alert("ニックネームとメッセージを入力してください！");
     return;
   }
 
@@ -326,136 +198,26 @@ function sendMessage() {
     timestamp: time
   });
 
-  document.getElementById("messageInput").value = "";
-}
-
-// ===== スタンプ選択機能 =====
-
-const stamps = [
-  "stamp1.png",
-  // ここにスタンプ画像ファイルを増やせます
-];
-
-const stampSelector = document.getElementById("stampSelector");
-const stampList = document.getElementById("stampList");
-
-function openStampSelector() {
-  stampList.innerHTML = ""; // 一旦リセット
-  stamps.forEach(src => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.alt = "スタンプ";
-    img.onclick = () => {
-      sendStamp(src);
-      closeStampSelector();
-    };
-    stampList.appendChild(img);
-  });
-  stampSelector.style.display = "block";
-}
-
-function closeStampSelector() {
-  stampSelector.style.display = "none";
+  messageInput.value = "";
 }
 
 function sendStamp(stampUrl) {
-  const name = document.getElementById("nameInput").value.trim();
+  const name = nameInput.value.trim();
   if (!name) {
-    alert("ニックネームを入れてね！");
+    alert("ニックネームを入力してください！");
     return;
   }
   const time = unknownTime ? "unknown" : Date.now();
 
   db.ref("messages").push({
-    name: name,
-    type: "stamp",
-    stampUrl: stampUrl,
-    userID: userID,
+    name,
+    message: `<img src="${stampUrl}" style="max-width: 100px;">`,
+    userID,
     timestamp: time
   });
+  // スタンプ送信後にパネルを閉じる
+  document.getElementById("stampPanel").style.display = "none";
 }
-
-// ===== 管理者 =====
-
-let isAdmin = false;
-
-document.getElementById("adminInput").addEventListener("change", () => {
-  isAdmin = document.getElementById("adminInput").value === "1x4s";
-  alert(isAdmin ? "管理者OK" : "コードが違います");
-});
-
-document.getElementById("deleteAll").onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  if (confirm("全部消しますか？")) {
-    db.ref("messages").remove();
-    chatBox.innerHTML = "";
-  }
-};
-
-document.getElementById("banBtn").onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  const id = document.getElementById("banIDInput").value.trim();
-  if (!id) return alert("IDを入力してください");
-  if (confirm(`ID「${id}」をBANしますか？`)) {
-    db.ref("bans/" + id).set(true);
-  }
-};
-
-document.getElementById("unbanBtn").onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  const id = document.getElementById("unbanIDInput").value.trim();
-  if (!id) return alert("IDを入力してください");
-  if (confirm(`ID「${id}」のBANを解除しますか？`)) {
-    db.ref("bans/" + id).remove();
-  }
-};
-
-// ===== BANリストの表示 =====
-const banListP = document.getElementById("banList");
-db.ref("bans").on("value", snapshot => {
-  const bans = snapshot.val() || {};
-  const ids = Object.keys(bans);
-  banListP.textContent = ids.length === 0 ? "なし" : ids.join(", ");
-});
-
-// ===== 見ている人（BAN除外でリアルタイム表示） =====
-const onlineCountP = document.getElementById("onlineCount");
-const onlineIDsP = document.getElementById("onlineIDs");
-const presenceRef = db.ref("presence/" + userID);
-const presenceListRef = db.ref("presence");
-
-// 接続状態の管理
-db.ref(".info/connected").on("value", snap => {
-  if (snap.val() === true) {
-    presenceRef.set(true);
-    presenceRef.onDisconnect().remove();
-  }
-});
-
-let currentBanIDs = [];
-let currentPresenceIDs = [];
-
-function updateOnlineDisplay() {
-  // BANされているIDを除いて表示
-  const visibleIDs = currentPresenceIDs.filter(id => !currentBanIDs.includes(id));
-  onlineCountP.textContent = `見ている人: ${visibleIDs.length}人`;
-  onlineIDsP.textContent = visibleIDs.length === 0 ? "見ている人のID: なし" : `見ている人のID: ${visibleIDs.join(", ")}`;
-}
-
-db.ref("bans").on("value", snapshot => {
-  const bans = snapshot.val() || {};
-  currentBanIDs = Object.keys(bans);
-  updateOnlineDisplay();
-});
-
-presenceListRef.on("value", snap => {
-  const ids = [];
-  snap.forEach(child => {
-    ids.push(child.key);
-  });
-  currentPresenceIDs = ids;
-  updateOnlineDisplay();
-});
 </script>
 </body>
 </html>
