@@ -1,340 +1,464 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>ホームページ</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>良いこと悪いこと考察用</title>
+
 <style>
-    body {
-        font-family: sans-serif;
-        margin: 20px;
-    }
+  body { 
+    font-family: sans-serif; 
+    background: #ffffcc; 
+    padding: 20px; 
+  }
 
-    h2 {
-        margin-top: 40px;
-    }
+  .voteResult {
+    font-weight: bold; 
+    margin-left: 10px; 
+    color: #cc9900;
+  }
 
-    /* 目次リンク（青色） */
-    .toc a {
-        color: #007bff;
-        text-decoration: underline;
-        cursor: pointer;
-        font-size: 20px;
-    }
+  #chatBox { 
+    border: 1px solid #cc9900; 
+    background: #fff8b3; 
+    padding: 10px; 
+    height: 300px; 
+    overflow-y: auto; 
+  }
 
-    .stamp-img {
-        width: 70px;
-        cursor: pointer;
-        margin-right: 10px;
-    }
+  input, textarea { 
+    width: 100%; 
+    margin-bottom: 10px; 
+    padding: 8px; 
+    font-size: 1em; 
+  }
 
-    .adminOnly { display: none; }
-    .ownerOnly { display: none; }
+  button { 
+    background-color: #cc9900; 
+    color: white; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    margin-bottom: 10px;
+  }
 
-    .ban-label { color: red; font-weight: bold; }
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .row button {
+    flex: 1;
+  }
+
+  p.message {
+    border-bottom: 1px solid #cc9900;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+  }
+
+  #adminBox {
+    margin-top: 40px;
+    padding: 15px;
+    border: 2px dashed #aa7700;
+    background: #fff3a0;
+  }
+
+  /* 目次リンクのスタイル */
+  #toc {
+    margin: 10px 0 30px 0;
+  }
+
+  #toc a {
+    color: #cc9900;
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 15px;
+  }
+
+  #toc a:hover {
+    text-decoration: underline;
+  }
+
+  /* スタンプ選択モーダル風 */
+  #stampSelector {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff8b3;
+    border: 2px solid #cc9900;
+    border-radius: 8px;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 0 10px #cc9900;
+  }
+  #stampSelector h3 {
+    margin-top: 0;
+    color: #cc9900;
+  }
+  #stampSelector .stampList {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 300px;
+  }
+  #stampSelector .stampList img {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    transition: border-color 0.2s;
+  }
+  #stampSelector .stampList img:hover {
+    border-color: #cc9900;
+  }
+  #stampSelector button.closeBtn {
+    background: #cc9900;
+    margin-top: 10px;
+  }
+
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
-<h1>作：らも</h1>
+<h1>良いこと悪いこと考察用</h1>
+<p>作: らも</p>
 
-<!-- ーーーーーーーーーーーーーー -->
-<!-- 目次 -->
-<!-- ーーーーーーーーーーーーーー -->
-<h2>ー目次ー</h2>
-<div class="toc">
-    <a onclick="scrollToSection('vote-section')">投票</a> / 
-    <a onclick="scrollToSection('message-section')">メッセージ</a> / 
-    <a onclick="scrollToSection('admin-section')">管理者権限</a>
+<!-- ここから目次 -->
+<div id="toc">
+  <a href="#voteSection">投票</a>
+  <a href="#messageSection">メッセージ</a>
+  <a href="#adminSection">管理者権限</a>
 </div>
+<!-- 目次ここまで -->
 
-<!-- ーーーーーーーーーーーーーー -->
-<!-- ★ 閉鎖画面（最初は非表示） -->
-<!-- ーーーーーーーーーーーーーー -->
-<div id="closed-screen" style="display:none; margin-top:40px;">
-    <h2 style="color:red;">ホームページは閉ざされています。</h2>
-    <p>ホームページを開けるコードを入力</p>
-    <input id="reopenCode" placeholder="コードを入力">
-    <button onclick="tryReopen()">開ける</button>
-</div>
+<h2 id="voteSection">投票お願いします</h2>
+<p>犯人は誰だと思う？</p>
 
-<!-- ーーーーーーーーーーーーーー -->
-<!-- 投票 -->
-<!-- ーーーーーーーーーーーーーー -->
-<h2 id="vote-section">投票</h2>
-<select id="voteSelect">
-    <option value="ターボー">ターボー</option>
-    <option value="ターボーの妻">ターボーの妻</option>
-    <option value="サトシ">サトシ</option>
-</select>
-<button onclick="sendVote()">投票する</button>
-
-<p>現在の票：</p>
-<ul id="voteList"></ul>
-
-<!-- ーーーーーーーーーーーーーー -->
-<!-- メッセージ -->
-<!-- ーーーーーーーーーーーーーー -->
-<h2 id="message-section">みんなのメッセージ</h2>
-
-<input id="name" placeholder="名前"><br>
-<input id="userid" placeholder="ID"><br>
-<input id="message" placeholder="メッセージ"><br>
-<button onclick="sendMessage()">送信</button>
-
-<h3>スタンプを選択</h3>
 <div>
-    <img src="stamp1.png" class="stamp-img" onclick="sendStamp('stamp1.png')">
-    <img src="stamp2.png" class="stamp-img" onclick="sendStamp('stamp2.png')">
-    <img src="stamp3.png" class="stamp-img" onclick="sendStamp('stamp3.png')">
+  <label><input type="radio" name="vote" value="タカキング"> タカキング</label>
+  <span class="voteResult" id="takakingCount">0 票</span>
 </div>
 
-<ul id="messageList"></ul>
-
-<h3>見ている人</h3>
-<p>人数：<span id="viewerCount">0</span></p>
-<ul id="viewerList"></ul>
-
-<!-- ーーーーーーーーーーーーーー -->
-<!-- 管理者権限 -->
-<!-- ーーーーーーーーーーーーーー -->
-<h2 id="admin-section">管理者権限</h2>
-
-<p>管理者コード</p>
-<input id="adminCodeInput" placeholder="コードを入力">
-<button onclick="checkAdmin()">送信</button>
-
-<div id="adminControls" class="adminOnly">
-    <h3>管理者メニュー</h3>
-    <p>メッセージ削除</p>
-    <input id="deleteId" placeholder="削除するメッセージID">
-    <button onclick="deleteMessage()">削除</button>
-
-    <p>BANするID</p>
-    <input id="banId" placeholder="BANするID">
-    <button onclick="banUser()">BAN</button>
-
-    <p>BAN解除</p>
-    <input id="unbanId" placeholder="解除するID">
-    <button onclick="unbanUser()">unBAN</button>
+<div>
+  <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
+  <span class="voteResult" id="taboCount">0 票</span>
 </div>
 
-<!-- ーーーーーーーーーーーーーー -->
-<!-- オーナー専用 -->
-<!-- ーーーーーーーーーーーーーー -->
-<div id="ownerControls" class="ownerOnly">
-    <h3>オーナー専用</h3>
-
-    <button onclick="closeHomepage()">ホームページを閉じる</button>
+<div>
+  <label><input type="radio" name="vote" value="ターボーの妻"> ターボーの妻</label>
+  <span class="voteResult" id="taboWifeCount">0 票</span>
 </div>
 
-<!-- Firebase（キミの設定を書く） -->
-<script type="module">
-    //=============================
-    // Firebase 設定（自分のに差し替えてOK）
-    //=============================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-        getDatabase, ref, set, push, onValue, remove
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+<div>
+  <label><input type="radio" name="vote" value="イマクニ"> イマクニ</label>
+  <span class="voteResult" id="imakuniCount">0 票</span>
+</div>
 
-    const firebaseConfig = YOUR_FIREBASE_CONFIG;
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+<div>
+  <label><input type="radio" name="vote" value="刑事"> 刑事</label>
+  <span class="voteResult" id="keijiCount">0 票</span>
+</div>
 
-    const closedRef = ref(db, "system/closed");
+<div>
+  <label><input type="radio" name="vote" value="アポロ"> アポロ</label>
+  <span class="voteResult" id="apolloCount">0 票</span>
+</div>
 
-    //=============================
-    // ページ閉鎖チェック
-    //=============================
-    onValue(closedRef, (snap) => {
-        const isClosed = snap.val();
+<button onclick="vote()">投票する</button>
 
-        if (isClosed === true) {
-            document.getElementById("closed-screen").style.display = "block";
-            document.body.style.display = "block";
-        } else {
-            document.getElementById("closed-screen").style.display = "none";
-        }
-    });
+<hr>
 
-    window.tryReopen = function () {
-        const code = document.getElementById("reopenCode").value;
-        if (code === "5y3y") {
-            set(closedRef, false);
-            alert("ホームページを開きました！");
-        } else {
-            alert("コードが違います");
-        }
-    };
+<h2 id="messageSection">お話しゾーン</h2>
 
-    //=============================
-    // 管理者 & オーナーチェック
-    //=============================
-    window.checkAdmin = function () {
-        const code = document.getElementById("adminCodeInput").value;
+<p>ニックネーム</p>
+<input type="text" id="nameInput" placeholder="ニックネーム">
 
-        if (code === "1x4s") {
-            document.querySelectorAll(".adminOnly").forEach(e => e.style.display = "block");
-            alert("管理者権限 ON");
-        }
+<p>メッセージ</p>
+<textarea id="messageInput" rows="4"></textarea>
 
-        if (code === "5y3y") {
-            document.querySelectorAll(".ownerOnly").forEach(e => e.style.display = "block");
-            alert("オーナー権限 ON");
-        }
-    };
+<div class="row">
+  <button onclick="sendMessage()">メッセージを送る</button>
+  <button onclick="toggleUnknownTime()" id="timeBtn">時間：通常</button>
+</div>
 
-    //=============================
-    // ホームページ閉鎖（オーナー）
-    //=============================
-    window.closeHomepage = function () {
-        if (confirm("本当に閉じますか？")) {
-            set(closedRef, true);
-            alert("閉鎖しました。");
-        }
-    };
+<!-- スタンプ選択ボタン -->
+<button onclick="openStampSelector()">スタンプを選択</button>
 
-    //=============================
-    // 投票
-    //=============================
-    const voteRef = ref(db, "vote");
+<!-- スタンプ選択モーダル -->
+<div id="stampSelector">
+  <h3>スタンプを選んでね！</h3>
+  <div class="stampList" id="stampList">
+    <!-- スタンプ画像がここに入る -->
+  </div>
+  <button class="closeBtn" onclick="closeStampSelector()">閉じる</button>
+</div>
 
-    window.sendVote = function () {
-        const item = document.getElementById("voteSelect").value;
-        push(voteRef, item);
-    };
+<h3>みんなのメッセージ</h3>
+<div id="chatBox"></div>
 
-    onValue(voteRef, (snap) => {
-        const data = snap.val() || {};
-        const list = document.getElementById("voteList");
-        list.innerHTML = "";
+<p id="onlineCount">見ている人: 0人</p>
+<p id="onlineIDs">見ている人のID: なし</p>
 
-        const count = {};
+<hr>
 
-        for (let id in data) {
-            const v = data[id];
-            if (!count[v]) count[v] = 0;
-            count[v]++;
-        }
+<div id="adminBox">
+  <h2 id="adminSection">管理者権限</h2>
 
-        for (let key in count) {
-            const li = document.createElement("li");
-            li.textContent = `${key}：${count[key]}票`;
-            list.appendChild(li);
-        }
-    });
+  <input type="text" id="adminInput" placeholder="管理者コード">
 
-    //=============================
-    // メッセージ & スタンプ
-    //=============================
-    const msgRef = ref(db, "messages");
+  <button id="deleteAll">⚠ メッセージ一括削除</button>
 
-    window.sendMessage = function () {
-        const name = document.getElementById("name").value;
-        const uid  = document.getElementById("userid").value;
-        const msg  = document.getElementById("message").value;
+  <h3>BANシステム</h3>
 
-        push(msgRef, {
-            name, uid, msg,
-            time: new Date().toLocaleString()
-        });
-    };
+  <input type="text" id="banIDInput" placeholder="BANするID">
+  <button id="banBtn">ID指定でBANする</button>
 
-    window.sendStamp = function (img) {
-        const name = document.getElementById("name").value;
-        const uid  = document.getElementById("userid").value;
+  <input type="text" id="unbanIDInput" placeholder="解除するID">
+  <button id="unbanBtn">ID指定でBANを解除する</button>
 
-        push(msgRef, {
-            name, uid,
-            stamp: img,
-            time: new Date().toLocaleString()
-        });
-    };
-
-    onValue(msgRef, (snap) => {
-        const data = snap.val() || {};
-        const list = document.getElementById("messageList");
-        list.innerHTML = "";
-
-        for (let id in data) {
-            const m = data[id];
-
-            const li = document.createElement("li");
-            li.innerHTML = `
-                <b>${m.name}</b> (${m.uid})<br>
-                ${m.msg ? m.msg : `<img src="${m.stamp}" width="70">`}<br>
-                <small>${m.time}</small>
-                <br>ID: ${id}
-            `;
-            list.appendChild(li);
-        }
-    });
-
-    //=============================
-    // メッセージ削除（管理者）
-    //=============================
-    window.deleteMessage = function () {
-        const id = document.getElementById("deleteId").value;
-        remove(ref(db, "messages/" + id));
-    };
-
-    //=============================
-    // BAN システム
-    //=============================
-    const banRef = ref(db, "ban");
-
-    window.banUser = function () {
-        const uid = document.getElementById("banId").value;
-        set(ref(db, "ban/" + uid), true);
-        alert("BANしました");
-    };
-
-    window.unbanUser = function () {
-        const uid = document.getElementById("unbanId").value;
-        remove(ref(db, "ban/" + uid));
-        alert("解除しました");
-    };
-
-    //=============================
-    // 見ている人（リアルタイム）
-    //=============================
-    const viewersRef = ref(db, "viewers");
-    const myId = Math.random().toString(36).slice(2);
-
-    // 自分を追加
-    set(ref(db, "viewers/" + myId), {
-        time: Date.now()
-    });
-
-    // 離脱時に削除
-    window.addEventListener("beforeunload", () => {
-        remove(ref(db, "viewers/" + myId));
-    });
-
-    onValue(viewersRef, (snap) => {
-        const data = snap.val() || {};
-
-        const list = document.getElementById("viewerList");
-        list.innerHTML = "";
-
-        let count = 0;
-
-        for (let id in data) {
-            count++;
-            const li = document.createElement("li");
-            li.textContent = id;
-            list.appendChild(li);
-        }
-
-        document.getElementById("viewerCount").textContent = count;
-    });
-</script>
+  <h4>現在BAN中のID一覧</h4>
+  <p id="banList">なし</p>
+</div>
 
 <script>
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-}
-</script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
+  authDomain: "iikotowaruikoto-d5aa7.firebaseapp.com",
+  databaseURL: "https://iikotowaruikoto-d5aa7-default-rtdb.firebaseio.com",
+  projectId: "iikotowaruikoto-d5aa7",
+  storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
+  messagingSenderId: "455780219216",
+  appId: "1:455780219216:web:225461fcf24c1a46f69455"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function generateID() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "";
+  for (let i = 0; i < 8; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
+let userID = localStorage.getItem("userID");
+if (!userID) {
+  userID = generateID();
+  localStorage.setItem("userID", userID);
+}
+
+db.ref("bans/" + userID).on("value", s => {
+  if (s.exists()) {
+    document.body.innerHTML = "<h1>あなたはBANされています</h1>";
+  }
+});
+
+// ===== 投票 =====
+function updateVotesUI(votes) {
+  takakingCount.innerText = (votes["タカキング"] || 0) + " 票";
+  taboCount.innerText = (votes["ターボー"] || 0) + " 票";
+  taboWifeCount.innerText = (votes["ターボーの妻"] || 0) + " 票";
+  imakuniCount.innerText = (votes["イマクニ"] || 0) + " 票";
+  keijiCount.innerText = (votes["刑事"] || 0) + " 票";
+  apolloCount.innerText = (votes["アポロ"] || 0) + " 票";
+}
+
+db.ref("votes").on("value", s => updateVotesUI(s.val() || {}));
+
+function vote() {
+  const sel = document.querySelector('input[name="vote"]:checked');
+  if (!sel) return alert("選んでね！");
+  db.ref("votes/" + sel.value).transaction(n => (n || 0) + 1);
+}
+
+// ===== チャット & 時間ON/OFF =====
+
+let unknownTime = false;
+
+function toggleUnknownTime() {
+  unknownTime = !unknownTime;
+  const btn = document.getElementById("timeBtn");
+  btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
+}
+
+const chatBox = document.getElementById("chatBox");
+
+db.ref('messages').on('child_added', snap => {
+  const msg = snap.val();
+  const time = msg.timestamp === "unknown" ? "不明" : new Date(msg.timestamp).toLocaleString();
+  const p = document.createElement("p");
+  p.className = "message";
+
+  if (msg.type === "stamp") {
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br><img src="${msg.stampUrl}" alt="スタンプ" width="80" />` +
+      `<br><small>${time}</small>`;
+  } else {
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
+  }
+
+  chatBox.prepend(p);
+});
+
+function sendMessage() {
+  const name = document.getElementById("nameInput").value.trim();
+  const message = document.getElementById("messageInput").value.trim();
+
+  if (!name || !message) {
+    alert("入力してね！");
+    return;
+  }
+
+  const time = unknownTime ? "unknown" : Date.now();
+
+  db.ref("messages").push({
+    name,
+    message,
+    userID,
+    timestamp: time,
+    type: "text"
+  });
+
+  document.getElementById("messageInput").value = "";
+}
+
+// ===== スタンプ選択機能 =====
+
+const stamps = [
+  "stamp1.png",
+  "stamp2.png",
+  "stamp3.png",
+];
+
+const stampSelector = document.getElementById("stampSelector");
+const stampList = document.getElementById("stampList");
+
+function openStampSelector() {
+  stampList.innerHTML = ""; // 一旦リセット
+  stamps.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "スタンプ";
+    img.onclick = () => {
+      sendStamp(src);
+      closeStampSelector();
+    };
+    stampList.appendChild(img);
+  });
+  stampSelector.style.display = "block";
+}
+
+function closeStampSelector() {
+  stampSelector.style.display = "none";
+}
+
+function sendStamp(stampUrl) {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) {
+    alert("ニックネームを入れてね！");
+    return;
+  }
+  const time = unknownTime ? "unknown" : Date.now();
+
+  db.ref("messages").push({
+    name: name,
+    type: "stamp",
+    stampUrl: stampUrl,
+    userID: userID,
+    timestamp: time
+  });
+}
+
+// ===== 管理者 =====
+
+let isAdmin = false;
+
+document.getElementById("adminInput").addEventListener("change", () => {
+  isAdmin = document.getElementById("adminInput").value === "1x4s";
+  alert(isAdmin ? "管理者OK" : "コードが違います");
+});
+
+document.getElementById("deleteAll").onclick = () => {
+  if (!isAdmin) return alert("管理者のみ");
+  if (confirm("全部消しますか？")) {
+    db.ref("messages").remove();
+    chatBox.innerHTML = "";
+  }
+};
+
+document.getElementById("banBtn").onclick = () => {
+  if (!isAdmin) return alert("管理者のみ");
+  const id = document.getElementById("banIDInput").value.trim();
+  if (!id) return alert("IDを入力してください");
+  if (confirm(`ID「${id}」をBANしますか？`)) {
+    db.ref("bans/" + id).set(true);
+  }
+};
+
+document.getElementById("unbanBtn").onclick = () => {
+  if (!isAdmin) return alert("管理者のみ");
+  const id = document.getElementById("unbanIDInput").value.trim();
+  if (!id) return alert("IDを入力してください");
+  if (confirm(`ID「${id}」のBANを解除しますか？`)) {
+    db.ref("bans/" + id).remove();
+  }
+};
+
+// ===== BANリストの表示 =====
+const banListP = document.getElementById("banList");
+db.ref("bans").on("value", snapshot => {
+  const bans = snapshot.val() || {};
+  const ids = Object.keys(bans);
+  banListP.textContent = ids.length === 0 ? "なし" : ids.join(", ");
+});
+
+// ===== 見ている人（BAN除外でリアルタイム表示） =====
+const onlineCountP = document.getElementById("onlineCount");
+const onlineIDsP = document.getElementById("onlineIDs");
+const presenceRef = db.ref("presence/" + userID);
+const presenceListRef = db.ref("presence");
+
+// 接続状態の管理
+db.ref(".info/connected").on("value", snap => {
+  if (snap.val() === true) {
+    presenceRef.set(true);
+    presenceRef.onDisconnect().remove();
+  }
+});
+
+let currentBanIDs = [];
+let currentPresenceIDs = [];
+
+function updateOnlineDisplay() {
+  // BANされているIDを除いて表示
+  const visibleIDs = currentPresenceIDs.filter(id => !currentBanIDs.includes(id));
+  onlineCountP.textContent = `見ている人: ${visibleIDs.length}人`;
+  onlineIDsP.textContent = visibleIDs.length === 0 ? "見ている人のID: なし" : `見ている人のID: ${visibleIDs.join(", ")}`;
+}
+
+db.ref("bans").on("value", snapshot => {
+  const bans = snapshot.val() || {};
+  currentBanIDs = Object.keys(bans);
+  updateOnlineDisplay();
+});
+
+presenceListRef.on("value", snap => {
+  const ids = [];
+  snap.forEach(child => {
+    ids.push(child.key);
+  });
+  currentPresenceIDs = ids;
+  updateOnlineDisplay();
+});
+</script>
 </body>
 </html>
