@@ -4,24 +4,66 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>いい事悪い事考察用</title>
+
 <style>
-  body { font-family: sans-serif; background: #ffffcc; padding: 20px; }
-  .voteResult { font-weight: bold; margin-left: 10px; color: #cc9900; }
-  #chatBox { border: 1px solid #cc9900; background: #fff8b3; padding: 10px; height: 300px; overflow-y: auto; }
-  input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; font-size: 1em; }
-  button { background-color: #cc9900; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
+  body { 
+    font-family: sans-serif; 
+    background: #ffffcc; 
+    padding: 20px; 
+  }
+
+  .voteResult {
+    font-weight: bold; 
+    margin-left: 10px; 
+    color: #cc9900;
+  }
+
+  #chatBox { 
+    border: 1px solid #cc9900; 
+    background: #fff8b3; 
+    padding: 10px; 
+    height: 300px; 
+    overflow-y: auto; 
+  }
+
+  input, textarea { 
+    width: 100%; 
+    margin-bottom: 10px; 
+    padding: 8px; 
+    font-size: 1em; 
+  }
+
+  button { 
+    background-color: #cc9900; 
+    color: white; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+  }
+
   p.message {
     border-bottom: 1px solid #cc9900;
     padding-bottom: 5px;
     margin-bottom: 5px;
   }
+
   p.message strong {
     color: #995500;
   }
+
   p.message time {
     color: #666;
     font-size: 0.8em;
     margin-left: 5px;
+  }
+
+  /* 管理者エリア */
+  #adminBox {
+    margin-top: 40px;
+    padding: 15px;
+    border: 2px dashed #aa7700;
+    background: #fff3a0;
   }
 </style>
 
@@ -47,11 +89,6 @@
   <span class="voteResult" id="taboCount">0 票</span>
 </div>
 
-  <div>
-  <label><input type="radio" name="vote" value="キングの妻"> リクエスト！キングの妻</label>
-  <span class="voteResult" id="kingutumaCount">0 票</span>
-</div>
-
 <div>
   <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
   <span class="voteResult" id="imakuniCount">0 票</span>
@@ -74,7 +111,7 @@
 <h2>お話しゾーン</h2>
 
 <p>ニックネーム</p>
-<input type="text" id="nameInput" placeholder="ニックネームを入力" />
+<input type="text" id="nameInput" placeholder="ニックネームを入力">
 
 <p>メッセージを入れてね</p>
 <textarea id="messageInput" rows="4" placeholder="メッセージを入力"></textarea>
@@ -83,6 +120,15 @@
 
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
+
+
+<!-- 管理者エリア -->
+<div id="adminBox">
+  <h2>管理者権限</h2>
+  <p>管理者パスワード</p>
+  <input type="text" id="adminInput" placeholder="管理者用コードを入力">
+</div>
+
 
 <script>
   // Firebaseの設定
@@ -103,7 +149,6 @@
   // 投票結果の表示更新
   function updateVotesUI(votes) {
     document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
-    document.getElementById("kingutumaCount").innerText = (votes["キングの妻"] || 0) + " 票";
     document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
     document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
     document.getElementById("keijiCount").innerText = (votes["刑事"] || 0) + " 票";
@@ -129,10 +174,10 @@
     alert("投票ありがとう！");
   }
 
-  // チャットのメッセージ表示場所
+  // メッセージ表示場所
   const chatBox = document.getElementById("chatBox");
 
-  // 新しいメッセージが来たらリアルタイムで表示（最新メッセージを上に表示）
+  // 新しいメッセージ（最新を上に表示）
   db.ref('messages').on('child_added', (snapshot) => {
     const msg = snapshot.val();
     if (msg && msg.name && msg.message && msg.timestamp) {
@@ -144,16 +189,19 @@
     }
   });
 
-  // メッセージ送信処理
+  // メッセージ送信
   function sendMessage() {
     const name = document.getElementById("nameInput").value.trim();
     const message = document.getElementById("messageInput").value.trim();
+
     if (!name || !message) {
       alert("名前とメッセージを入れてね！");
       return;
     }
+
     const timestamp = Date.now();
     db.ref('messages').push({ name, message, timestamp });
+
     document.getElementById("messageInput").value = "";
   }
 </script>
