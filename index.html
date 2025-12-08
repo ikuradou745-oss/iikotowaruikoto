@@ -1,35 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>いい事悪い事考察用</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>いい事悪い事考察用</title>
+
+<style>
+  body { 
+    font-family: sans-serif; 
+    background: #ffffcc; 
+    padding: 20px; 
+  }
+
+  .voteResult {
+    font-weight: bold; 
+    margin-left: 10px; 
+    color: #cc9900;
+  }
+
+  #chatBox { 
+    border: 1px solid #cc9900; 
+    background: #fff8b3; 
+    padding: 10px; 
+    height: 300px; 
+    overflow-y: auto; 
+  }
+
+  input, textarea { 
+    width: 100%; 
+    margin-bottom: 10px; 
+    padding: 8px; 
+    font-size: 1em; 
+  }
+
+  button { 
+    background-color: #cc9900; 
+    color: white; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+  }
+
+  p.message {
+    border-bottom: 1px solid #cc9900;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+  }
+
+  p.message strong {
+    color: #995500;
+  }
+
+  p.message time {
+    color: #666;
+    font-size: 0.8em;
+    margin-left: 5px;
+  }
+
+  /* 管理者エリア */
+  #adminBox {
+    margin-top: 40px;
+    padding: 15px;
+    border: 2px dashed #aa7700;
+    background: #fff3a0;
+  }
+</style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
-  <h1>いい事悪い事 投稿場</h1>
 
-  <input id="nameInput" placeholder="名前" />
-  <br><br>
-  <textarea id="messageInput" placeholder="メッセージ"></textarea>
-  <br>
-  <button onclick="sendMessage()">投稿</button>
+<h1>良いこと悪いこと考察用</h1>
 
-  <hr>
+<h2>投票お願いします</h2>
+<p>犯人は誰だと思う？</p>
 
-  <h2>みんなの投稿（最新順）</h2>
-  <div id="messages"></div>
+<div>
+  <label><input type="radio" name="vote" value="タカキング"> タカキング！</label>
+  <span class="voteResult" id="takakingCount">0 票</span>
+</div>
 
-  <hr>
+<div>
+  <label><input type="radio" name="vote" value="ターボー"> ターボー</label>
+  <span class="voteResult" id="taboCount">0 票</span>
+</div>
 
-  <h3>管理者権限</h3>
-  <input id="adminCode" placeholder="管理者コード" />
-  <button onclick="checkAdmin()">認証</button>
-  <br><br>
-  <button onclick="deleteAllMessages()">メッセージ一括削除</button>
+<div>
+  <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
+  <span class="voteResult" id="imakuniCount">0 票</span>
+</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<div>
+  <label><input type="radio" name="vote" value="刑事"> 刑事？</label>
+  <span class="voteResult" id="keijiCount">0 票</span>
+</div>
 
+<div>
+  <label><input type="radio" name="vote" value="アポロ"> アポロとか！</label>
+  <span class="voteResult" id="apolloCount">0 票</span>
+</div>
+
+<button onclick="vote()">投票する</button>
+
+<hr>
+
+<h2>お話しゾーン</h2>
+
+<p>ニックネーム</p>
+<input type="text" id="nameInput" placeholder="ニックネームを入力">
+
+<p>メッセージを入れてね</p>
+<textarea id="messageInput" rows="4" placeholder="メッセージを入力"></textarea>
+
+<button onclick="sendMessage()">メッセージ送る</button>
+
+<h3>みんなのメッセージ</h3>
+<div id="chatBox"></div>
+
+
+<!-- 管理者エリア -->
+<div id="adminBox">
+  <h2>管理者権限</h2>
+  <p>管理者パスワード</p>
+  <input type="text" id="adminInput" placeholder="管理者用コードを入力">
+</div>
+
+
+<script>
+  // Firebaseの設定
   const firebaseConfig = {
     apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
     authDomain: "iikotowaruikoto-d5aa7.firebaseapp.com",
@@ -37,104 +139,71 @@
     projectId: "iikotowaruikoto-d5aa7",
     storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
     messagingSenderId: "455780219216",
-    appId: "1:455780219216:web:225461fcf24c1a46f69455",
-    measurementId: "G-YQD459DBSG"
+    appId: "1:455780219216:web:225461fcf24c1a46f69455"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+  // Firebase初期化
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  let isAdmin = false;
-
-  function getTime() {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = (d.getMonth()+1).toString().padStart(2,"0");
-    const day = d.getDate().toString().padStart(2,"0");
-    const h = d.getHours().toString().padStart(2,"0");
-    const min = d.getMinutes().toString().padStart(2,"0");
-    const s = d.getSeconds().toString().padStart(2,"0");
-
-    return `${y}/${m}/${day} ${h}:${min}:${s}`;
+  // 投票結果の表示更新
+  function updateVotesUI(votes) {
+    document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
+    document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
+    document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
+    document.getElementById("keijiCount").innerText = (votes["刑事"] || 0) + " 票";
+    document.getElementById("apolloCount").innerText = (votes["アポロ"] || 0) + " 票";
   }
 
-  window.sendMessage = function(){
-    const name = document.getElementById("nameInput").value;
-    const text = document.getElementById("messageInput").value;
+  // 投票のリアルタイム更新
+  db.ref('votes').on('value', (snapshot) => {
+    const votes = snapshot.val() || {};
+    updateVotesUI(votes);
+  });
 
-    if(name === "" || text === "") return alert("名前とメッセージを入れてね");
-
-    const messagesRef = ref(database, "messages");
-    push(messagesRef, {
-      name: name,
-      text: text,
-      time: getTime(),
-      votes: 0,
-      createdAt: Date.now()
-    });
-
-    document.getElementById("messageInput").value = "";
+  // 投票処理
+  function vote() {
+    const selected = document.querySelector('input[name="vote"]:checked');
+    if (!selected) {
+      alert("誰かを選んでね！");
+      return;
+    }
+    const voteName = selected.value;
+    const voteRef = db.ref('votes/' + voteName);
+    voteRef.transaction(current => (current || 0) + 1);
+    alert("投票ありがとう！");
   }
 
-  const messagesRef = ref(database, "messages");
+  // メッセージ表示場所
+  const chatBox = document.getElementById("chatBox");
 
-  onValue(messagesRef, (snapshot) => {
-    const data = snapshot.val();
-    const messagesDiv = document.getElementById("messages");
-    messagesDiv.innerHTML = "";
-
-    if(data){
-      const entries = Object.entries(data).sort((a,b)=> b[1].createdAt - a[1].createdAt);
-
-      for(const [key,value] of entries){
-        const div = document.createElement("div");
-        div.style.border = "1px solid black";
-        div.style.margin = "5px";
-        div.style.padding = "5px";
-
-        div.innerHTML = `
-          <b>${value.name}</b> (${value.time})<br>
-          ${value.text}<br><br>
-          投票数：${value.votes}
-          <button onclick="vote('${key}','${value.votes}')">👍</button>
-        `;
-        messagesDiv.appendChild(div);
-      }
+  // 新しいメッセージ（最新を上に表示）
+  db.ref('messages').on('child_added', (snapshot) => {
+    const msg = snapshot.val();
+    if (msg && msg.name && msg.message && msg.timestamp) {
+      const p = document.createElement('p');
+      p.className = 'message';
+      const dateStr = new Date(msg.timestamp).toLocaleString();
+      p.innerHTML = `<strong>${msg.name}</strong> <time>${dateStr}</time><br>${msg.message}`;
+      chatBox.prepend(p);
     }
   });
 
-  window.vote = function(id, currentVotes){
-    const msgRef = ref(database, "messages/" + id);
-    update(msgRef, {
-      votes: currentVotes + 1
-    });
-  }
+  // メッセージ送信
+  function sendMessage() {
+    const name = document.getElementById("nameInput").value.trim();
+    const message = document.getElementById("messageInput").value.trim();
 
-  window.checkAdmin = function(){
-    const code = document.getElementById("adminCode").value;
-
-    if(code === "1x4s"){
-      isAdmin = true;
-      alert("管理者モードON");
-    }else{
-      isAdmin = false;
-      alert("コードが違います");
-    }
-  }
-
-  window.deleteAllMessages = function(){
-    if(!isAdmin){
-      alert("まず管理者コードを入れてください");
+    if (!name || !message) {
+      alert("名前とメッセージを入れてね！");
       return;
     }
 
-    const ok = confirm("本当にすべてのメッセージを消しますか？");
-    if(ok){
-      remove(messagesRef);
-      alert("すべて削除しました");
-    }
-  }
+    const timestamp = Date.now();
+    db.ref('messages').push({ name, message, timestamp });
 
+    document.getElementById("messageInput").value = "";
+  }
 </script>
 
 </body>
