@@ -65,20 +65,24 @@
     background: #fff3a0;
   }
 
-  /* 目次リンクのスタイル */
+  /* 目次 */
   #toc {
     margin: 10px 0 30px 0;
   }
-
+  #toc h2 {
+    font-weight: bold;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+  }
   #toc a {
-    color: #cc9900;
-    text-decoration: none;
+    color: #007bff;
+    text-decoration: underline;
     font-weight: bold;
     margin-right: 15px;
+    cursor: pointer;
   }
-
   #toc a:hover {
-    text-decoration: underline;
+    color: #0056b3;
   }
 
 </style>
@@ -92,14 +96,15 @@
 <h1>良いこと悪いこと考察用</h1>
 <p>作: らも</p>
 
-<!-- ここから目次 -->
+<!-- 目次 -->
 <div id="toc">
+  <h2>ー目次ー</h2>
   <a href="#voteSection">投票</a>
   <a href="#messageSection">メッセージ</a>
   <a href="#adminSection">管理者権限</a>
 </div>
-<!-- 目次ここまで -->
 
+<!-- 投票 -->
 <h2 id="voteSection">投票お願いします</h2>
 <p>犯人は誰だと思う？</p>
 
@@ -137,6 +142,7 @@
 
 <hr>
 
+<!-- メッセージ -->
 <h2 id="messageSection">お話しゾーン</h2>
 
 <p>ニックネーム</p>
@@ -158,6 +164,7 @@
 
 <hr>
 
+<!-- 管理者権限 -->
 <div id="adminBox">
   <h2 id="adminSection">管理者権限</h2>
 
@@ -185,7 +192,7 @@ const firebaseConfig = {
   projectId: "iikotowaruikoto-d5aa7",
   storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
   messagingSenderId: "455780219216",
-  appId: "1:455780219216:web:225461fcf24c1a46f69455"
+  appId: "1:455780219216:web:225461fc24c1a46f69455"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -206,6 +213,7 @@ if (!userID) {
   localStorage.setItem("userID", userID);
 }
 
+// BANされてるかチェック
 db.ref("bans/" + userID).on("value", s => {
   if (s.exists()) {
     document.body.innerHTML = "<h1>あなたはBANされています</h1>";
@@ -354,5 +362,6 @@ presenceListRef.on("value", snap => {
   updateOnlineDisplay();
 });
 </script>
+
 </body>
 </html>
