@@ -6,67 +6,93 @@
 <title>良いこと悪いこと考察用</title>
 
 <style>
-  body { 
-    font-family: sans-serif; 
-    background: #ffffcc; 
-    padding: 20px; 
-  }
+body { 
+  font-family: sans-serif; 
+  background: #ffffcc; 
+  padding: 20px; 
+}
 
-  .voteResult {
-    font-weight: bold; 
-    margin-left: 10px; 
-    color: #cc9900;
-  }
+.voteResult {
+  font-weight: bold; 
+  margin-left: 10px; 
+  color: #cc9900;
+}
 
-  #chatBox { 
-    border: 1px solid #cc9900; 
-    background: #fff8b3; 
-    padding: 10px; 
-    height: 300px; 
-    overflow-y: auto; 
-  }
+#chatBox { 
+  border: 1px solid #cc9900; 
+  background: #fff8b3; 
+  padding: 10px; 
+  height: 300px; 
+  overflow-y: auto; 
+}
 
-  input, textarea { 
-    width: 100%; 
-    margin-bottom: 10px; 
-    padding: 8px; 
-    font-size: 1em; 
-  }
+input, textarea { 
+  width: 100%; 
+  margin-bottom: 10px; 
+  padding: 8px; 
+  font-size: 1em; 
+}
 
-  button { 
-    background-color: #cc9900; 
-    color: white; 
-    padding: 10px; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer; 
-    margin-bottom: 10px;
-  }
+button { 
+  background-color: #cc9900; 
+  color: white; 
+  padding: 10px; 
+  border: none; 
+  border-radius: 4px; 
+  cursor: pointer; 
+}
 
-  .row {
-    display: flex;
-    gap: 10px;
-  }
+p.message {
+  border-bottom: 1px solid #cc9900;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+}
 
-  .row button {
-    flex: 1;
-  }
+p.message strong {
+  color: #995500;
+}
 
-  p.message {
-    border-bottom: 1px solid #cc9900;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-  }
+p.message time {
+  color: #666;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
 
-  #adminBox {
-    margin-top: 40px;
-    padding: 15px;
-    border: 2px dashed #aa7700;
-    background: #fff3a0;
-  }
+#adminBox {
+  margin-top: 40px;
+  padding: 15px;
+  border: 2px dashed #aa7700;
+  background: #fff3a0;
+}
 
+/* 確認ボックス */
+#confirmBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 200, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+#confirmInner {
+  background: #fff8b3;
+  padding: 20px;
+  border: 3px solid #cc9900;
+  text-align: center;
+  max-width: 300px;
+}
+
+#confirmInner button {
+  margin: 5px;
+}
 </style>
 
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -80,7 +106,7 @@
 <p>犯人は誰だと思う？</p>
 
 <div>
-  <label><input type="radio" name="vote" value="タカキング"> タカキング</label>
+  <label><input type="radio" name="vote" value="タカキング"> タカキング！</label>
   <span class="voteResult" id="takakingCount">0 票</span>
 </div>
 
@@ -90,17 +116,17 @@
 </div>
 
 <div>
-  <label><input type="radio" name="vote" value="イマクニ"> イマクニ</label>
+  <label><input type="radio" name="vote" value="イマクニ"> イマクニ？</label>
   <span class="voteResult" id="imakuniCount">0 票</span>
 </div>
 
 <div>
-  <label><input type="radio" name="vote" value="刑事"> 刑事</label>
+  <label><input type="radio" name="vote" value="刑事"> 刑事？</label>
   <span class="voteResult" id="keijiCount">0 票</span>
 </div>
 
 <div>
-  <label><input type="radio" name="vote" value="アポロ"> アポロ</label>
+  <label><input type="radio" name="vote" value="アポロ"> アポロとか！</label>
   <span class="voteResult" id="apolloCount">0 票</span>
 </div>
 
@@ -111,33 +137,29 @@
 <h2>お話しゾーン</h2>
 
 <p>ニックネーム</p>
-<input type="text" id="nameInput" placeholder="ニックネーム">
+<input type="text" id="nameInput" placeholder="ニックネームを入力">
 
 <p>メッセージ</p>
-<textarea id="messageInput" rows="4"></textarea>
+<textarea id="messageInput" rows="4" placeholder="メッセージを入力"></textarea>
 
-<div class="row">
-  <button onclick="sendMessage()">メッセージを送る</button>
-  <button onclick="toggleUnknownTime()" id="timeBtn">時間：通常</button>
-</div>
+<button onclick="sendMessage()">メッセージを送る</button>
 
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
 
 <div id="adminBox">
   <h2>管理者権限</h2>
+  <p>管理者パスワード</p>
+  <input type="text" id="adminInput" placeholder="管理者用コードを入力">
+</div>
 
-  <input type="text" id="adminInput" placeholder="管理者コード">
-
-  <button id="deleteAll">⚠ メッセージ一括削除</button>
-
-  <h3>BANシステム</h3>
-
-  <input type="text" id="banIDInput" placeholder="BANするID">
-  <button id="banBtn">ID指定でBANする</button>
-
-  <input type="text" id="unbanIDInput" placeholder="解除するID">
-  <button id="unbanBtn">ID指定でBANを解除する</button>
+<!-- 確認ポップアップ -->
+<div id="confirmBox">
+  <div id="confirmInner">
+    <p id="confirmText">本当に実行しますか？</p>
+    <button onclick="confirmYes()">はい</button>
+    <button onclick="confirmNo()">いいえ</button>
+  </div>
 </div>
 
 <script>
@@ -154,6 +176,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+/* ===== ユーザーID作成 ===== */
 function generateID() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let id = "";
@@ -169,97 +192,127 @@ if (!userID) {
   localStorage.setItem("userID", userID);
 }
 
-db.ref("bans/" + userID).on("value", s => {
-  if (s.exists()) {
-    document.body.innerHTML = "<h1>あなたはBANされています</h1>";
-  }
-});
-
-// ===== 投票 =====
+/* ===== 投票 ===== */
 function updateVotesUI(votes) {
-  takakingCount.innerText = (votes["タカキング"] || 0) + " 票";
-  taboCount.innerText = (votes["ターボー"] || 0) + " 票";
-  imakuniCount.innerText = (votes["イマクニ"] || 0) + " 票";
-  keijiCount.innerText = (votes["刑事"] || 0) + " 票";
-  apolloCount.innerText = (votes["アポロ"] || 0) + " 票";
+  document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
+  document.getElementById("taboCount").innerText   = (votes["ターボー"] || 0) + " 票";
+  document.getElementById("imakuniCount").innerText = (votes["イマクニ"] || 0) + " 票";
+  document.getElementById("keijiCount").innerText   = (votes["刑事"] || 0) + " 票";
+  document.getElementById("apolloCount").innerText  = (votes["アポロ"] || 0) + " 票";
 }
 
-db.ref("votes").on("value", s => updateVotesUI(s.val() || {}));
+db.ref('votes').on('value', (snapshot) => {
+  const votes = snapshot.val() || {};
+  updateVotesUI(votes);
+});
 
 function vote() {
-  const sel = document.querySelector('input[name="vote"]:checked');
-  if (!sel) return alert("選んでね！");
-  db.ref("votes/" + sel.value).transaction(n => (n || 0) + 1);
-}
-
-// ===== チャット & 時間ON/OFF =====
-
-let unknownTime = false;
-
-function toggleUnknownTime() {
-  unknownTime = !unknownTime;
-  const btn = document.getElementById("timeBtn");
-  btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
-}
-
-db.ref('messages').on('child_added', snap => {
-  const msg = snap.val();
-  const time = msg.timestamp === "unknown" ? "不明" : new Date(msg.timestamp).toLocaleString();
-  const p = document.createElement("p");
-  p.className = "message";
-  p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
-  chatBox.prepend(p);
-});
-
-function sendMessage() {
-  const name = nameInput.value.trim();
-  const message = messageInput.value.trim();
-
-  if (!name || !message) {
-    alert("入力してね！");
+  const selected = document.querySelector('input[name="vote"]:checked');
+  if (!selected) {
+    alert("誰か選んでね！");
     return;
   }
 
-  const time = unknownTime ? "unknown" : Date.now();
-
-  db.ref("messages").push({
-    name,
-    message,
-    userID,
-    timestamp: time
-  });
-
-  messageInput.value = "";
+  const voteName = selected.value;
+  const voteRef = db.ref('votes/' + voteName);
+  voteRef.transaction(current => (current || 0) + 1);
+  alert("投票ありがとう！");
 }
 
-// ===== 管理者 =====
+/* ===== チャット ===== */
+const chatBox = document.getElementById("chatBox");
 
-let isAdmin = false;
+db.ref('messages').on('child_added', (snapshot) => {
+  const msg = snapshot.val();
+  if (msg && msg.name && msg.message && msg.timestamp && msg.userID) {
+    const p = document.createElement('p');
+    p.className = 'message';
 
-adminInput.addEventListener("change", () => {
-  isAdmin = adminInput.value === "1x4s";
-  alert(isAdmin ? "管理者OK" : "コードが違います");
+    const dateStr = new Date(msg.timestamp).toLocaleString();
+
+    p.innerHTML = `
+      <strong>${msg.name} [${msg.userID}]</strong>
+      <time>${dateStr}</time><br>
+      ${msg.message}
+    `;
+
+    chatBox.prepend(p);
+  }
 });
 
-deleteAll.onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  if (confirm("全部消しますか？")) {
+function sendMessage() {
+  const name = document.getElementById("nameInput").value.trim();
+  const message = document.getElementById("messageInput").value.trim();
+
+  if (!name || !message) {
+    alert("名前とメッセージを入れてね！");
+    return;
+  }
+
+  const timestamp = Date.now();
+
+  db.ref('messages').push({ 
+    name: name, 
+    message: message, 
+    timestamp: timestamp,
+    userID: userID
+  });
+
+  document.getElementById("messageInput").value = "";
+}
+
+/* ===== 管理者機能 ===== */
+let isAdmin = false;
+
+document.getElementById("adminInput").addEventListener("change", function() {
+  if (this.value === "1x4s") {
+    isAdmin = true;
+    alert("✅ 管理者モードON");
+  } else {
+    isAdmin = false;
+    alert("❌ コードが違います");
+  }
+});
+
+const adminBox = document.getElementById("adminBox");
+
+const deleteBtn = document.createElement("button");
+deleteBtn.textContent = "⚠ メッセージ一括削除";
+
+deleteBtn.onclick = function() {
+  if (!isAdmin) {
+    alert("管理者コードが違います");
+    return;
+  }
+
+  showConfirm("本当にすべてのメッセージを削除しますか？", function() {
     db.ref("messages").remove();
     chatBox.innerHTML = "";
-  }
+    alert("全メッセージを削除しました");
+  });
 };
 
-banBtn.onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  const id = banIDInput.value.trim();
-  if (id) db.ref("bans/" + id).set(true);
-};
+adminBox.appendChild(deleteBtn);
 
-unbanBtn.onclick = () => {
-  if (!isAdmin) return alert("管理者のみ");
-  const id = unbanIDInput.value.trim();
-  if (id) db.ref("bans/" + id).remove();
-};
+/* ===== はい / いいえ 確認 ===== */
+let confirmAction = null;
+
+function showConfirm(message, action) {
+  document.getElementById("confirmText").innerText = message;
+  document.getElementById("confirmBox").style.display = "flex";
+  confirmAction = action;
+}
+
+function confirmYes() {
+  if (confirmAction) confirmAction();
+  document.getElementById("confirmBox").style.display = "none";
+}
+
+function confirmNo() {
+  document.getElementById("confirmBox").style.display = "none";
+  confirmAction = null;
+}
 </script>
+
 </body>
 </html>
