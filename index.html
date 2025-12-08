@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>いい事悪い事考察用</title>
+<title>良いこと悪いこと考察用</title>
 
 <style>
   body { 
@@ -75,6 +75,7 @@
 <body>
 
 <h1>良いこと悪いこと考察用</h1>
+<p>作: らも</p>
 
 <h2>投票お願いします</h2>
 <p>犯人は誰だと思う？</p>
@@ -121,14 +122,12 @@
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
 
-
 <!-- 管理者エリア -->
 <div id="adminBox">
   <h2>管理者権限</h2>
   <p>管理者パスワード</p>
   <input type="text" id="adminInput" placeholder="管理者用コードを入力">
 </div>
-
 
 <script>
   // Firebaseの設定
@@ -146,7 +145,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // 投票結果の表示更新
+  // ===== 投票 =====
   function updateVotesUI(votes) {
     document.getElementById("takakingCount").innerText = (votes["タカキング"] || 0) + " 票";
     document.getElementById("taboCount").innerText = (votes["ターボー"] || 0) + " 票";
@@ -155,13 +154,11 @@
     document.getElementById("apolloCount").innerText = (votes["アポロ"] || 0) + " 票";
   }
 
-  // 投票のリアルタイム更新
   db.ref('votes').on('value', (snapshot) => {
     const votes = snapshot.val() || {};
     updateVotesUI(votes);
   });
 
-  // 投票処理
   function vote() {
     const selected = document.querySelector('input[name="vote"]:checked');
     if (!selected) {
@@ -174,10 +171,10 @@
     alert("投票ありがとう！");
   }
 
-  // メッセージ表示場所
+  // ===== チャット =====
+
   const chatBox = document.getElementById("chatBox");
 
-  // 新しいメッセージ（最新を上に表示）
   db.ref('messages').on('child_added', (snapshot) => {
     const msg = snapshot.val();
     if (msg && msg.name && msg.message && msg.timestamp) {
@@ -189,7 +186,6 @@
     }
   });
 
-  // メッセージ送信
   function sendMessage() {
     const name = document.getElementById("nameInput").value.trim();
     const message = document.getElementById("messageInput").value.trim();
@@ -204,6 +200,41 @@
 
     document.getElementById("messageInput").value = "";
   }
+
+  // ===== 管理者機能 =====
+
+  let isAdmin = false;
+
+  document.getElementById("adminInput").addEventListener("change", function() {
+    if (this.value === "1x4s") {
+      isAdmin = true;
+      alert("✅ 管理者権限が使えるようになったよ");
+    } else {
+      isAdmin = false;
+      alert("❌ コードが違います");
+    }
+  });
+
+  const adminBox = document.getElementById("adminBox");
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "⚠ メッセージ一括削除";
+  deleteBtn.onclick = function() {
+    if (!isAdmin) {
+      alert("管理者コードが違います");
+      return;
+    }
+
+    const ok = confirm("本当にすべてのメッセージを消しますか？");
+    if (ok) {
+      db.ref("messages").remove();
+      chatBox.innerHTML = "";
+      alert("全メッセージを削除しました");
+    }
+  };
+
+  adminBox.appendChild(deleteBtn);
+
 </script>
 
 </body>
