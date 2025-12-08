@@ -58,7 +58,6 @@
     margin-left: 5px;
   }
 
-  /* 管理者エリア */
   #adminBox {
     margin-top: 40px;
     padding: 15px;
@@ -122,7 +121,6 @@
 <h3>みんなのメッセージ</h3>
 <div id="chatBox"></div>
 
-<!-- 管理者エリア -->
 <div id="adminBox">
   <h2>管理者権限</h2>
   <p>管理者パスワード</p>
@@ -130,7 +128,6 @@
 </div>
 
 <script>
-  // Firebaseの設定
   const firebaseConfig = {
     apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
     authDomain: "iikotowaruikoto-d5aa7.firebaseapp.com",
@@ -141,9 +138,24 @@
     appId: "1:455780219216:web:225461fcf24c1a46f69455"
   };
 
-  // Firebase初期化
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
+
+  // ===== 8文字IDを作る =====
+  function generateID() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let id = "";
+    for (let i = 0; i < 8; i++) {
+      id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+  }
+
+  let userID = localStorage.getItem("userID");
+  if (!userID) {
+    userID = generateID();
+    localStorage.setItem("userID", userID);
+  }
 
   // ===== 投票 =====
   function updateVotesUI(votes) {
@@ -172,16 +184,15 @@
   }
 
   // ===== チャット =====
-
   const chatBox = document.getElementById("chatBox");
 
   db.ref('messages').on('child_added', (snapshot) => {
     const msg = snapshot.val();
-    if (msg && msg.name && msg.message && msg.timestamp) {
+    if (msg && msg.name && msg.message && msg.timestamp && msg.userID) {
       const p = document.createElement('p');
       p.className = 'message';
       const dateStr = new Date(msg.timestamp).toLocaleString();
-      p.innerHTML = `<strong>${msg.name}</strong> <time>${dateStr}</time><br>${msg.message}`;
+      p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong> <time>${dateStr}</time><br>${msg.message}`;
       chatBox.prepend(p);
     }
   });
@@ -196,7 +207,13 @@
     }
 
     const timestamp = Date.now();
-    db.ref('messages').push({ name, message, timestamp });
+
+    db.ref('messages').push({ 
+      name: name, 
+      message: message, 
+      timestamp: timestamp,
+      userID: userID
+    });
 
     document.getElementById("messageInput").value = "";
   }
