@@ -119,7 +119,6 @@
     background: #cc9900;
     margin-top: 10px;
   }
-
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -300,9 +299,9 @@ db.ref('messages').on('child_added', snap => {
   p.className = "message";
 
   if (msg.type === "stamp") {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br><img src="${msg.stampUrl}" alt="スタンプ" width="80" />`;
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br><img src="${msg.stampUrl}" alt="スタンプ" width="80" /><br><small>時間：${time}</small>`;
   } else {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
+    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>時間：${time}</small>`;
   }
 
   chatBox.prepend(p);
