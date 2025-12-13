@@ -405,11 +405,21 @@ db.ref('messages').on('child_added', snap => {
   p.className = "message";
 
   if (msg.type === "stamp") {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br><img src="${msg.stampUrl}" alt="スタンプ" width="80" />` +
-      `<br><small>${time}</small>`;
-  } else {
-    p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
-  }
+  p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>
+    <img src="${msg.stampUrl}" width="80"><br>
+    <small>${time}</small>`;
+}
+else if (msg.type === "big") {
+  p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>
+    <div class="bigMessage">${msg.message}</div>
+    <small>${time}</small>`;
+}
+else {
+  p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>
+    ${msg.message}<br>
+    <small>${time}</small>`;
+}
+
 
   chatBox.prepend(p);
 
