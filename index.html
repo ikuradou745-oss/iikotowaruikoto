@@ -570,6 +570,19 @@ if (copyBtn) {
   };
 }
 
+  // ===== オーナー解除コード =====
+function unlockSite() {
+  const input = document.getElementById("ownerCodeInput").value;
+
+  if (input === "5y3y") {
+    db.ref("siteClosed").set(false);
+    alert("ホームページを開きました！");
+  } else {
+    alert("コードが違います");
+  }
+}
+
+
   
 </script>
 
