@@ -498,6 +498,35 @@ function sendStamp(stampUrl) {
 
 }
 
+  // ===== でかメッセージ =====
+document.getElementById("sendBigMessageBtn").onclick = () => {
+  if (!isAdmin) {
+    alert("管理者のみ使えます");
+    return;
+  }
+
+  const name = document.getElementById("nameInput").value.trim();
+  const text = document.getElementById("bigMessageInput").value.trim();
+
+  if (!name || !text) {
+    alert("ニックネームとメッセージを入れてね");
+    return;
+  }
+
+  const time = unknownTime ? "unknown" : Date.now();
+
+  db.ref("messages").push({
+    name: name,
+    message: text,
+    userID: userID,
+    timestamp: time,
+    type: "big"
+  });
+
+  document.getElementById("bigMessageInput").value = "";
+};
+
+
 // ===== 管理者 =====
 
 let isAdmin = false;
