@@ -72,7 +72,6 @@
 
   #toc a {
     color: #cc9900;
-    color: #0066ff;
     text-decoration: none;
     font-weight: bold;
     margin-right: 15px;
@@ -105,7 +104,6 @@
     flex-wrap: wrap;
     max-width: 300px;
   }
-
   #stampSelector .stampList img {
     width: 60px;
     height: 60px;
@@ -120,7 +118,6 @@
   #stampSelector button.closeBtn {
     background: #cc9900;
     margin-top: 10px;
-    margin: 5px;
   }
 
 </style>
@@ -176,6 +173,8 @@
   <span class="voteResult" id="apolloCount">0 票</span>
 </div>
 
+
+
 <button onclick="vote()">投票する</button>
 
 <hr>
@@ -195,9 +194,8 @@
 
 <!-- スタンプ選択ボタン -->
 <button onclick="openStampSelector()">スタンプを選択</button>
-<div class="row">
-  <button onclick="shareBoard()">みんなを呼ぶ🔔</button>
-</div>
+
+
 
 <!-- スタンプ選択モーダル -->
 <div id="stampSelector">
@@ -206,9 +204,6 @@
     <!-- スタンプ画像がここに入る -->
   </div>
   <button class="closeBtn" onclick="closeStampSelector()">閉じる</button>
-  <h3>スタンプ</h3>
-  <div class="stampList" id="stampList"></div>
-  <button onclick="closeStampSelector()">閉じる</button>
 </div>
 
 <h3>みんなのメッセージ</h3>
@@ -221,11 +216,14 @@
 
 <div id="adminBox">
   <h2 id="adminSection">管理者権限</h2>
-  <input id="adminInput" placeholder="管理者コード">
-  
+
+
+
   <input type="text" id="adminInput" placeholder="管理者コード">
 
   <button id="deleteAll">⚠ メッセージ一括削除</button>
+
+
 
   <h3>BANシステム</h3>
 
@@ -248,7 +246,6 @@ const firebaseConfig = {
   storageBucket: "iikotowaruikoto-d5aa7.appspot.com",
   messagingSenderId: "455780219216",
   appId: "1:455780219216:web:225461fcf24c1a46f69455"
-  databaseURL: "https://iikotowaruikoto-d5aa7-default-rtdb.firebaseio.com"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -294,8 +291,6 @@ function vote() {
 }
 
 // ===== チャット & 時間ON/OFF =====
-let userID = localStorage.getItem("userID") || Math.random().toString(36).slice(2,10);
-localStorage.setItem("userID", userID);
 
 let unknownTime = false;
 
@@ -303,9 +298,6 @@ function toggleUnknownTime() {
   unknownTime = !unknownTime;
   const btn = document.getElementById("timeBtn");
   btn.textContent = unknownTime ? "時間：不明" : "時間：通常";
-function toggleUnknownTime(){
-  unknownTime=!unknownTime;
-  timeBtn.textContent = unknownTime ? "時間：不明" : "時間：通常";
 }
 
 const chatBox = document.getElementById("chatBox");
@@ -322,21 +314,15 @@ db.ref('messages').on('child_added', snap => {
   } else {
     p.innerHTML = `<strong>${msg.name} [${msg.userID}]</strong><br>${msg.message}<br><small>${time}</small>`;
   }
-function vote(){
-  const v=document.querySelector('input[name="vote"]:checked');
-  if(!v) return;
-  db.ref("votes/"+v.value).transaction(n=>(n||0)+1);
-}
 
   chatBox.prepend(p);
-db.ref("votes").on("value",s=>{
-  const v=s.val()||{};
-  takakingCount.textContent=(v["タカキング"]||0)+" 票";
-  taboCount.textContent=(v["ターボー"]||0)+" 票";
-  taboWifeCount.textContent=(v["ターボーの妻"]||0)+" 票";
-  imakuniCount.textContent=(v["イマクニ"]||0)+" 票";
-  keijiCount.textContent=(v["刑事"]||0)+" 票";
-  apolloCount.textContent=(v["アポロ"]||0)+" 票";
+
+
+
+
+
+
+
 });
 
 function sendMessage() {
@@ -349,30 +335,18 @@ function sendMessage() {
   }
 
   const time = unknownTime ? "unknown" : Date.now();
-db.ref("messages").on("child_added",s=>{
-  const m=s.val();
-  const t=m.timestamp==="unknown"?"不明":new Date(m.timestamp).toLocaleString();
-  chatBox.innerHTML=`<p class="message"><b>${m.name}[${m.userID}]</b><br>`+
-  (m.type==="stamp"?`<img src="${m.stampUrl}" width="80">`:m.message)+
-  `<br><small>${t}</small></p>`+chatBox.innerHTML;
-});
 
-function sendMessage(){
-  if(!nameInput.value||!messageInput.value) return;
+
+
   db.ref("messages").push({
     name,
     message,
-    name:nameInput.value,
-    message:messageInput.value,
     userID,
     timestamp: time,
     type: "text"
-    timestamp: unknownTime?"unknown":Date.now(),
-    type:"text"
   });
 
   document.getElementById("messageInput").value = "";
-  messageInput.value="";
 }
 
 // ===== スタンプ選択機能 =====
@@ -397,21 +371,12 @@ function openStampSelector() {
       closeStampSelector();
     };
     stampList.appendChild(img);
-const stamps=["stamp1.png","stamp2.png","stamp3.png"];
-function openStampSelector(){
-  stampList.innerHTML="";
-  stamps.forEach(s=>{
-    const i=document.createElement("img");
-    i.src=s;
-    i.onclick=()=>sendStamp(s);
-    stampList.appendChild(i);
   });
   stampSelector.style.display = "block";
 }
 
 function closeStampSelector() {
   stampSelector.style.display = "none";
-  stampSelector.style.display="block";
 }
 
 function sendStamp(stampUrl) {
@@ -422,22 +387,14 @@ function sendStamp(stampUrl) {
   }
   const time = unknownTime ? "unknown" : Date.now();
 
-function closeStampSelector(){stampSelector.style.display="none";}
-function sendStamp(s){
-  if(!nameInput.value) return;
   db.ref("messages").push({
     name: name,
     type: "stamp",
     stampUrl: stampUrl,
     userID: userID,
     timestamp: time
-    name:nameInput.value,
-    userID,
-    stampUrl:s,
-    timestamp: unknownTime?"unknown":Date.now(),
-    type:"stamp"
   });
-  closeStampSelector();
+
 }
 
 // ===== 管理者 =====
@@ -463,13 +420,6 @@ document.getElementById("banBtn").onclick = () => {
   if (!id) return alert("IDを入力してください");
   if (confirm(`ID「${id}」をBANしますか？`)) {
     db.ref("bans/" + id).set(true);
-function shareBoard(){
-  const text="掲示板で待ってるよ！\nhttps://ikuradou745-oss.github.io/iikotowaruikoto/";
-  if(navigator.share){
-    navigator.share({text,url:"https://ikuradou745-oss.github.io/iikotowaruikoto/"});
-  }else{
-    navigator.clipboard.writeText(text);
-    alert("文章をコピーしました！");
   }
 };
 
