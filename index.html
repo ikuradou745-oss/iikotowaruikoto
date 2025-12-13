@@ -7,20 +7,6 @@
 
 <style>
   body { 
-
-    <!-- サイト閉鎖画面 -->
-      <div id="closedScreen" style="display:none; text-align:center; margin-top:50px;">
-        <h1>ホームページは閉ざされています。</h1>
-        <p>オーナー専用コードを入れてください。</p>
-
-        <input type="text" id="ownerCodeInput" placeholder="コードを入力">
-        <br>
-        <button onclick="unlockSite()">開く</button>
-      </div>
-
-    <!-- 通常コンテンツ -->
-    <div id="mainContent">
-
     font-family: sans-serif; 
     background: #ffffcc; 
     padding: 20px; 
@@ -135,7 +121,7 @@
   }
 
 </style>
-
+  
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -143,6 +129,19 @@
 
 <body>
 
+<!-- サイト閉鎖画面 -->
+<div id="closedScreen" style="display:none; text-align:center; margin-top:50px;">
+  <h1>ホームページは閉ざされています。</h1>
+  <p>オーナー専用コードを入れてください。</p>
+
+  <input type="text" id="ownerCodeInput" placeholder="コードを入力">
+  <br>
+  <button onclick="unlockSite()">開く</button>
+</div>
+
+<!-- 通常コンテンツ -->
+<div id="mainContent">
+  
 <h1>良いこと悪いこと考察用</h1>
 <p>作: らも</p>
 
@@ -281,6 +280,23 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+  // ===== サイト閉鎖チェック =====
+const closedScreen = document.getElementById("closedScreen");
+const mainContent = document.getElementById("mainContent");
+
+db.ref("siteClosed").on("value", snap => {
+  const closed = snap.val();
+
+  if (closed === true) {
+    closedScreen.style.display = "block";
+    mainContent.style.display = "none";
+  } else {
+    closedScreen.style.display = "none";
+    mainContent.style.display = "block";
+  }
+});
+
 
 function generateID() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -557,5 +573,7 @@ if (copyBtn) {
   
 </script>
 
+  </div> <!-- mainContent 終わり -->
+  
 </body>
 </html>
