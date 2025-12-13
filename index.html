@@ -267,6 +267,15 @@
   <p id="banList">なし</p>
 </div>
 
+<hr>
+
+<h3>オーナー権限</h3>
+
+<input type="text" id="ownerInput" placeholder="オーナーコード（5y3y）">
+
+<button id="closeSiteBtn">ホームページを閉じる ⚠️</button>
+
+  
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyDcds20u1-6-nk7710P4xddsa-m1wDL0TQ",
@@ -580,6 +589,33 @@ function unlockSite() {
   } else {
     alert("コードが違います");
   }
+}
+
+  // ===== オーナー権限 =====
+let isOwner = false;
+
+const ownerInput = document.getElementById("ownerInput");
+const closeSiteBtn = document.getElementById("closeSiteBtn");
+
+if (ownerInput) {
+  ownerInput.addEventListener("change", () => {
+    isOwner = ownerInput.value === "5y3y";
+    alert(isOwner ? "オーナー認証OK" : "オーナーコードが違います");
+  });
+}
+
+if (closeSiteBtn) {
+  closeSiteBtn.onclick = () => {
+    if (!isOwner) {
+      alert("オーナー専用です");
+      return;
+    }
+
+    if (confirm("本当にホームページを閉じますか？")) {
+      db.ref("siteClosed").set(true);
+      alert("ホームページを閉じました");
+    }
+  };
 }
 
 
