@@ -192,8 +192,25 @@
   <button onclick="toggleUnknownTime()" id="timeBtn">時間：通常</button>
 </div>
 
-<!-- スタンプ選択ボタン -->
-<button onclick="openStampSelector()">スタンプを選択</button>
+<!-- スタンプ選択ボタン と　共有 -->
+<div class="row">
+  <button onclick="openStampSelector()">スタンプを選択</button>
+  <button id="shareBtn">みんなを呼ぶ🔔</button>
+</div>
+
+<div id="shareFallback" style="display:none; margin-top:10px;">
+  <p>
+    あなたの端末では共有できません。<br>
+    Chromeブラウザなどで開いてください。
+  </p>
+  <p>
+    それ以外の方法：<br>
+    下のボタンをタップして、LINEなどに貼り付けてください。
+  </p>
+  <button id="copyBtn">リンクをコピー</button>
+  <p id="copyMsg" style="display:none; color:green;">コピーしました！</p>
+</div>
+
 
 
 
@@ -478,6 +495,46 @@ presenceListRef.on("value", snap => {
   currentPresenceIDs = ids;
   updateOnlineDisplay();
 });
+
+  // ===== みんなを呼ぶ（共有） =====
+const shareBtn = document.getElementById("shareBtn");
+const fallbackBox = document.getElementById("shareFallback");
+const copyBtn = document.getElementById("copyBtn");
+const copyMsg = document.getElementById("copyMsg");
+
+const shareData = {
+  title: "良いこと悪いこと考察用",
+  text: "みんなで投票とチャットしよう！",
+  url: location.href
+};
+
+if (shareBtn) {
+  shareBtn.onclick = async () => {
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (e) {
+        // キャンセル時は何もしない
+      }
+    } else {
+      fallbackBox.style.display = "block";
+    }
+  };
+}
+
+if (copyBtn) {
+  copyBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      copyMsg.style.display = "block";
+      setTimeout(() => copyMsg.style.display = "none", 2000);
+    } catch (e) {
+      alert("コピーに失敗しました");
+    }
+  };
+}
+
+  
 </script>
 
 </body>
