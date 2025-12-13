@@ -7,6 +7,20 @@
 
 <style>
   body { 
+
+    <!-- サイト閉鎖画面 -->
+      <div id="closedScreen" style="display:none; text-align:center; margin-top:50px;">
+        <h1>ホームページは閉ざされています。</h1>
+        <p>オーナー専用コードを入れてください。</p>
+
+        <input type="text" id="ownerCodeInput" placeholder="コードを入力">
+        <br>
+        <button onclick="unlockSite()">開く</button>
+      </div>
+
+    <!-- 通常コンテンツ -->
+    <div id="mainContent">
+
     font-family: sans-serif; 
     background: #ffffcc; 
     padding: 20px; 
